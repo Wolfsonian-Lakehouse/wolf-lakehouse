@@ -1,6 +1,6 @@
 # Ignore local data folders
 data/
-logs/
+config.ini
 
 # Ignore mounted network drives (just in case)
 /mnt/
