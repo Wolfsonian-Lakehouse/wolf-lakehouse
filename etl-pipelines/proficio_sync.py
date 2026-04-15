@@ -16,7 +16,6 @@ if not os.path.exists(config_path):
 config.read(config_path)
 
 def get_proficio_connection():
-    # Pulling exactly what's in the INI
     try:
         server = config['proficio']['server']
         database = config['proficio']['database']
@@ -33,6 +32,7 @@ def get_proficio_connection():
         f"DATABASE={database};"
         f"UID={username};"
         f"PWD={password};"
+        f"Authentication=ActiveDirectoryPassword;"
         f"Encrypt=yes;"
         f"TrustServerCertificate=yes;"
     )
