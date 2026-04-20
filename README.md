@@ -1,6 +1,6 @@
 <div align="center">
 
-  # 🐺 Wolf Lakehouse ETL
+  # 🐺 Wolfsonian Lakehouse ETL
 
   *A robust, containerized Data Lakehouse architecture for extracting, staging, and analyzing museum and library collection data using Python, DuckDB, and Parquet.*
 
@@ -23,7 +23,7 @@
 ---
 
 ## 🧐 About the Project
-The Wolf Lakehouse is an automated ELT (Extract, Load, Transform) pipeline designed to unify disparate data sources into a single, high-performance analytics layer. It extracts data from APIs, legacy SQL Server databases, and binary MARC files, staging them as raw Parquet files before transforming them into a clean, "Gold" standard layer for visualization in Metabase.
+The Wolfsonian Lakehouse is an automated ELT (Extract, Load, Transform) pipeline designed to unify disparate data sources into a single, high-performance analytics layer. It extracts data from APIs, legacy SQL Server databases, and binary MARC files, staging them as raw Parquet files before transforming them into a clean, "Gold" standard layer for visualization in Metabase.
 
 ## 🏗️ Architecture & Tech Stack
 * **Orchestration:** Docker & Docker Compose
@@ -50,7 +50,7 @@ The Wolf Lakehouse is an automated ELT (Extract, Load, Transform) pipeline desig
 wolf-lakehouse/
 ├── docker-compose.yml           # The Master Switch for orchestration
 ├── Dockerfile                   # Builds the Python 3.10 environment + ODBC/Kerberos
-├── config.ini                   # Database credentials (Do not commit!)
+├── config.ini                   # Database credentials (Ignored in Git)
 ├── aaukstuo.keytab              # Kerberos Keytab (Ignored in Git)
 │
 ├── etl-pipelines/               # Core Extraction Microservices
