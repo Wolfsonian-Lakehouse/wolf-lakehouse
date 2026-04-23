@@ -16,9 +16,9 @@ config.read('/app/config.ini')
 # Define Lakehouse Paths
 RAW_PROFICIO = Path('/app/data/raw/proficio/objects_raw_dump.parquet')
 RAW_ISLANDORA = Path('/app/data/raw/islandora/islandora_lookup.parquet')
-OUTPUT_CSV = Path('/app/data/gold/missing_objects.csv')
+OUTPUT_PARQUET = Path('/app/data/gold/missing_objects.parquet')
 
-OUTPUT_CSV.parent.mkdir(parents=True, exist_ok=True)
+OUTPUT_PARQUET.parent.mkdir(parents=True, exist_ok=True)
 
 # --- Logging Setup ---
 logger = logging.getLogger()
@@ -299,14 +299,9 @@ if __name__ == "__main__":
         ]
         final_columns_exist = [col for col in final_columns if col in df_results.columns]
         
-        # Save CSV for Workbench
-        df_results[final_columns_exist].to_csv(OUTPUT_CSV, index=False, encoding='utf-8', errors='replace')
-        logging.info(f"Saved CSV results to {OUTPUT_CSV}")
-        
         # Save Parquet for the Gold layer
-        output_parquet = OUTPUT_CSV.with_suffix('.parquet')
-        df_results[final_columns_exist].astype(str).to_parquet(output_parquet, index=False)
-        logging.info(f"Saved Parquet results to {output_parquet}")
+        df_results[final_columns_exist].astype(str).to_parquet(OUTPUT_PARQUET, index=False)
+        logging.info(f"Saved Parquet results to {OUTPUT_PARQUET}")
         
     else:
         logging.info("No missing records to save.")
