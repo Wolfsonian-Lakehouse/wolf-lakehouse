@@ -5,4 +5,4 @@ services:
       - .:/app
       - /etc/krb5.keytabs/aaukstuo.keytab:/app/aaukstuo.keytab:ro
     working_dir: /app
-    command: python etl-pipelines/extract_proficio_raw.py
+    command: bash run_all.sh
