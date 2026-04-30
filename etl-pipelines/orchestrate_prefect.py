@@ -8,12 +8,11 @@ logger = logging.getLogger(__name__)
 def run_script(script_path: str):
     """Runs a Python script as a subprocess and raises an error if it fails."""
     logger.info(f"Running script: {script_path}")
-    result = subprocess.run(['python', script_path], capture_output=True, text=True)
+    result = subprocess.run(['python', script_path])
     if result.returncode != 0:
-        logger.error(f"Error in {script_path}:\n{result.stderr}")
         raise RuntimeError(f"Script {script_path} failed with exit code {result.returncode}")
     else:
-        logger.info(f"Successfully ran {script_path}:\n{result.stdout}")
+        logger.info(f"Successfully ran {script_path}")
 
 @task(name="Extract Proficio Raw")
 def extract_proficio():

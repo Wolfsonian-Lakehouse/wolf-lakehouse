@@ -1,6 +1,6 @@
 services:
   prefect-server:
-    image: prefecthq/prefect:2-python3.10
+    image: prefecthq/prefect:3-python3.10
     command: prefect server start --host 0.0.0.0
     ports:
       - "4200:4200"
@@ -17,7 +17,7 @@ services:
       - PREFECT_API_URL=http://prefect-server:4200/api
     depends_on:
       - prefect-server
-    command: python etl-pipelines/orchestrate_prefect.py
+    command: bash -c "sleep 5 && python etl-pipelines/orchestrate_prefect.py"
 
 volumes:
   prefect-data:
