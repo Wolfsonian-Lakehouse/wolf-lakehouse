@@ -1,5 +1,7 @@
 import subprocess
 import logging
+import json
+import os
 from prefect import flow, task
 
 logging.basicConfig(level=logging.INFO)
@@ -30,13 +32,35 @@ def extract_alma():
 def transform_proficio():
     run_script('etl-pipelines/transform_proficio_silver.py')
 
-@task(name="Transform Alma Silver")
-def transform_alma():
-    run_script('etl-pipelines/transform_alma_raw.py')
-
 @task(name="Export Proficio to Workbench")
 def export_proficio():
     run_script('etl-pipelines/export_proficio_to_workbench.py')
+
+@task(name="Report Pipeline Metrics")
+def report_metrics():
+    metrics_path = '/app/data/metrics.json'
+    if not os.path.exists(metrics_path):
+        logger.warning("No metrics.json found. Summary cannot be generated.")
+        return
+
+    try:
+        with open(metrics_path, 'r') as f:
+            metrics = json.load(f)
+            
+        summary = f"""
+        \n
+        ==================================================
+        📊 WOLFSONIAN LAKEHOUSE METRICS SUMMARY
+        ==================================================
+        Proficio Records Extracted (Delta): {metrics.get('proficio_extracted', 0)}
+        Proficio Deltas Processed:          {metrics.get('proficio_deltas_processed', 0)}
+        Total Silver Master Records:        {metrics.get('proficio_silver_total', 0)}
+        Missing Records Sent to Gold:       {metrics.get('missing_objects_found', 0)}
+        ==================================================
+        """
+        logger.info(summary)
+    except Exception as e:
+        logger.warning(f"Could not load metrics summary: {e}")
 
 @flow(name="Wolfsonian Lakehouse Pipeline")
 def lakehouse_flow():
@@ -45,16 +69,17 @@ def lakehouse_flow():
     islandora_raw = extract_islandora.submit()
     alma_raw = extract_alma.submit()
 
-    # Transformation Phase (depends on extraction)
+    # Transformation Phase
     proficio_silver = transform_proficio.submit(wait_for=[proficio_raw, islandora_raw])
-    alma_silver = transform_alma.submit(wait_for=[alma_raw])
 
     # Export Phase
     export_fut = export_proficio.submit(wait_for=[proficio_silver])
+    
+    # Metrics Dashboard Phase
+    metrics_fut = report_metrics.submit(wait_for=[export_fut, alma_raw])
 
     # Explicitly wait for terminal tasks to complete so the flow doesn't exit early
-    export_fut.wait()
-    alma_silver.wait()
+    metrics_fut.wait()
 
 if __name__ == "__main__":
     lakehouse_flow()
