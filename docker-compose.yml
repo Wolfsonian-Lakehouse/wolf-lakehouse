@@ -21,6 +21,13 @@ services:
       - prefect-server
     command: bash -c "sleep 5 && python etl-pipelines/orchestrate_prefect.py"
 
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3030:3000"
+    volumes:
+      - ./data:/metabase-data
+      - ./metabase-plugins:/plugins
+
 volumes:
   prefect-data: {}
-
