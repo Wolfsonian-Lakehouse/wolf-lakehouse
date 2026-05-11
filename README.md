@@ -67,6 +67,7 @@ wolf-lakehouse/
 │   └── silver/                  # Silver Layer: Persistent, deduplicated master tables
 ├── docker-compose.yml           # The Master Switch for orchestration
 ├── Dockerfile                   # Builds the Python 3.10 environment + ODBC/Kerberos
+├── Dockerfile.metabase          # Custom Ubuntu image for Metabase DuckDB support
 ├── etl-pipelines/               # Core Extraction & Transformation Microservices
 │   ├── extract_alma_raw.py
 │   ├── extract_islandora_raw.py

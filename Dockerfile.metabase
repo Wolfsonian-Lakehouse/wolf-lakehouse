@@ -1,6 +1,20 @@
-FROM metabase/metabase:latest
-USER root
-RUN apk add --no-cache libstdc++ gcompat libc6-compat || (apt-get update && apt-get install -y libstdc++6 libc6)
+# We use an Ubuntu-based Java image so DuckDB has native glibc!
+# This completely prevents the Alpine/musl segfaults.
+FROM eclipse-temurin:21-jre-jammy
+
+# Install required tools
+RUN apt-get update && apt-get install -y wget curl && rm -rf /var/lib/apt/lists/*
+
+# Download the latest open-source Metabase jar
+RUN wget https://downloads.metabase.com/latest/metabase.jar -O /metabase.jar
+
+# Tell Metabase where to find the plugins folder
+ENV MB_PLUGINS_DIR=/plugins
+
+EXPOSE 3000
+
+# Start Metabase
+CMD ["java", "-jar", "/metabase.jar"]
 
 
 
