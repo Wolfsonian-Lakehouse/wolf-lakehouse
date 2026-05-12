@@ -42,6 +42,38 @@ if __name__ == "__main__":
         
     logging.info("🛠️ Applying Silver transformations...")
     
+    # 0. MAP RAW COLUMNS TO WORKBENCH STANDARDS
+    alma_rename_map = {
+        'new_907_full': 'field_identifier',
+        'new_001_ctrl': 'alma_identifier',
+        'new_598_a': 'field_credit_line',
+        'new_655_a': 'field_genre',
+        'new_500_a': 'field_description_long',
+        'new_561_a': 'field_collection_note',
+        'new_260_a': 'field_place_published',
+        'new_546_a': 'field_language',
+        'new_300_c': 'field_physical_form',
+        'new_610_a': 'field_subjects_name'
+    }
+    df = df.rename(columns=alma_rename_map)
+    
+    # Construct a composite title if the pieces exist
+    if 'new_245_a' in df.columns:
+        b_col = df['new_245_b'].fillna('') if 'new_245_b' in df.columns else ''
+        df['title'] = df['new_245_a'].fillna('') + ' ' + b_col
+        df['title'] = df['title'].str.strip()
+        
+    # Construct physical extent
+    if 'new_300_a' in df.columns:
+        b_col = df['new_300_b'].fillna('') if 'new_300_b' in df.columns else ''
+        df['field_extent'] = df['new_300_a'].fillna('') + ' ' + b_col
+        df['field_extent'] = df['field_extent'].str.strip()
+        
+    # Add static fields
+    df['field_resource_type'] = 'Collection'
+    df['field_model'] = 'Paged Content'
+    df['field_collection_type'] = 'Library'
+    
     # 1. Drop completely empty columns (very common in MARC dumps)
     initial_cols = len(df.columns)
     df = df.dropna(axis=1, how='all')

@@ -242,6 +242,25 @@ if __name__ == "__main__":
         logging.info(f"Found {len(delta_files)} new incremental Delta files.")
         df_deltas = pd.concat([pd.read_parquet(f) for f in delta_files], ignore_index=True)
         
+        # --- RENAME RAW PROFICIO COLUMNS TO WORKBENCH STANDARDS ---
+        rename_map = {
+            'cat_nbr': 'field_identifier',
+            'cat_nam': 'title',
+            'artist': 'field_linked_agent',
+            'name': 'field_genre',
+            'categ_16': 'original_date',
+            'maker': 'field_place_published',
+            'categ_9': 'field_subject',
+            'obj_mem': 'field_description_long',
+            'categ_4': 'field_credit_line',
+            'class': 'field_physical_form',
+            'weight': 'field_extent'
+        }
+        df_deltas = df_deltas.rename(columns=rename_map)
+        
+        if 'field_genre' in df_deltas.columns:
+            df_deltas['field_genre'] = df_deltas['field_genre'].astype(str).str.upper()
+        
         # Apply Transforms ONLY to the new delta rows
         df_deltas['field_resource_type'] = 'Collection'
         df_deltas['field_model'] = 'Paged Content'

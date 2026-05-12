@@ -25,7 +25,7 @@
 The Wolfsonian Lakehouse is an automated, incremental ELT (Extract, Load, Transform) pipeline designed to unify disparate data sources into a single, high-performance analytics layer. It extracts data from APIs, legacy SQL Server databases, and binary MARC files, staging them as raw Parquet files before transforming them into a clean, "Gold" standard layer for downstream systems like Workbench and Metabase.
 
 ## 🏗️ Architecture & Tech Stack
-* **Orchestration:** Prefect 3 (Massive 11-Node DAG) & Docker Compose
+* **Orchestration:** Prefect 3 (Massive 12-Node DAG) & Docker Compose
 * **Data Extraction:** Python 3.10 (Pandas, PyArrow, requests, pymarc)
 * **Database Connectivity:** SQLAlchemy, pyodbc (ODBC Driver 18 for SQL Server)
 * **Authentication:** Automated Kerberos (`kinit`) integration inside containers
@@ -41,7 +41,8 @@ The Wolfsonian Lakehouse is an automated, incremental ELT (Extract, Load, Transf
 * **Metabase Serving Layer (DuckDB):** The pipeline concludes by automatically generating a persistent DuckDB database with instantaneous, zero-copy Views pointing directly to the Parquet files. Metabase easily connects to this DuckDB file for lightning-fast BI visualization.
 * **QA Quarantine (Dead Letter Queue):** Records that fail critical data quality checks (missing identifiers, empty titles) are automatically isolated into a `proficio_qa_failures.parquet` file via a dedicated microservice instead of breaking the pipeline. This allows data stewards to easily identify and fix dirty source data.
 * **Concurrent API Fetching:** The Islandora microservice utilizes a `ThreadPoolExecutor` and auto-discovery logic to fetch paginated API data rapidly, utilizing exponential backoff for network resilience.
-* **Robust Workflow Orchestration:** Uses Prefect to manage the ETL pipeline. The monolithic scripts have been completely decoupled into an 11-node Directed Acyclic Graph (DAG), providing an incredibly granular UI dashboard for monitoring, task-level asynchronous execution, and real-time metric summaries at the end of every flow.
+* **Unified Gold Catalog:** The pipeline dynamically bridges the massive schema gap between library systems (Alma) and museum systems (Proficio), automatically aligning and concatenating both into a single unified queryable table with a strict predetermined column hierarchy.
+* **Robust Workflow Orchestration:** Uses Prefect to manage the ETL pipeline. The monolithic scripts have been completely decoupled into an 12-node Directed Acyclic Graph (DAG), providing an incredibly granular UI dashboard for monitoring, task-level asynchronous execution, and real-time metric summaries at the end of every flow.
 
 ---
 
@@ -55,6 +56,7 @@ wolf-lakehouse/
 │   ├── metrics.json             # Execution metrics for Prefect dashboard
 │   ├── watermark_proficio.json  # State tracker for Incremental Delta loads
 │   ├── gold/                    # Gold Layer: Clean outputs & QA failures
+│   │   ├── unified_catalog.parquet
 │   │   ├── missing_objects.parquet
 │   │   ├── proficio_qa_failures.parquet
 │   │   ├── proficio_workbench_export.csv
@@ -76,10 +78,11 @@ wolf-lakehouse/
 │   ├── transform_alma_silver.py
 │   ├── isolate_proficio_qa_failures.py
 │   ├── export_gold_missing_objects.py
+│   ├── export_gold_unified_catalog.py
 │   ├── export_proficio_to_workbench.py
 │   ├── export_alma_to_workbench.py
 │   ├── build_duckdb_views.py    
-│   └── orchestrate_prefect.py   # Master 11-Node Prefect Workflow
+│   └── orchestrate_prefect.py   # Master 12-Node Prefect Workflow
 └── README.md
 ```
 
