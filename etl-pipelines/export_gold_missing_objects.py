@@ -30,8 +30,11 @@ if __name__ == "__main__":
     df_master = pd.read_parquet(UNIFIED_CATALOG)
     df_islandora = pd.read_parquet(RAW_ISLANDORA)
     
-    # Filter to only passed QA checks
-    df_pass = df_master[df_master['qa_pass']].copy() if 'qa_pass' in df_master.columns else df_master.copy()
+    # Filter out records that explicitly failed QA. Keep 'True' and empty/NaN (like Alma records)
+    if 'qa_pass' in df_master.columns:
+        df_pass = df_master[df_master['qa_pass'].astype(str).str.lower() != 'false'].copy()
+    else:
+        df_pass = df_master.copy()
     
     identifier_column = 'field_identifier'
     if identifier_column not in df_pass.columns and 'access_nbr' in df_pass.columns:

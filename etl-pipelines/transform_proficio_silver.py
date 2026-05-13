@@ -302,7 +302,7 @@ if __name__ == "__main__":
     # Clean string columns and drop completely empty ones (prevents DuckDB 'UNKNOWN' type crashes)
     str_cols = df_master.select_dtypes(include=['object', 'string']).columns
     for col in str_cols:
-        df_master[col] = df_master[col].astype(str).str.strip().replace('', pd.NA).replace('nan', pd.NA).replace('None', pd.NA)
+        df_master.loc[:, col] = df_master[col].astype(str).str.strip().replace('', pd.NA).replace('nan', pd.NA).replace('None', pd.NA)
         
     df_master = df_master.dropna(axis=1, how='all')
     

@@ -118,8 +118,8 @@ def lakehouse_flow():
     qa_failures = isolate_qa_failures.submit(wait_for=[proficio_silver])
 
     # 4. Gold Generation Phase
-    missing_objects = generate_missing_objects.submit(wait_for=[qa_failures, islandora_raw, unified_catalog])
     unified_catalog = generate_unified_catalog.submit(wait_for=[proficio_silver, alma_silver])
+    missing_objects = generate_missing_objects.submit(wait_for=[qa_failures, islandora_raw, unified_catalog])
 
     # 5. Export Phase (CSV to Workbench)
     proficio_csv = export_proficio.submit(wait_for=[missing_objects])
