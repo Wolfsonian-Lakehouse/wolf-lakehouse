@@ -281,15 +281,16 @@ if __name__ == "__main__":
         logging.info(f"Loaded existing Silver Master with {len(df_master)} records.")
         if not df_deltas.empty:
             df_combined = pd.concat([df_master, df_deltas], ignore_index=True)
-            # Deduplicate keeping the latest version. Proficio unique key is access_nbr
-            if 'access_nbr' in df_combined.columns:
+            # Deduplicate keeping the latest version.
+            # Use field_identifier (renamed from cat_nbr) as the true Proficio primary key.
+            # access_nbr is NULL for most records and causes massive data loss with drop_duplicates.
+            if 'field_identifier' in df_combined.columns:
+                df_master = df_combined.drop_duplicates(subset=['field_identifier'], keep='last')
+            elif 'access_nbr' in df_combined.columns:
+                logging.warning("field_identifier not found. Falling back to access_nbr for dedup.")
                 df_master = df_combined.drop_duplicates(subset=['access_nbr'], keep='last')
             else:
-                logging.warning("No 'access_nbr' column found for UPSERT. Attempting to use field_identifier.")
-                if 'field_identifier' in df_combined.columns:
-                    df_master = df_combined.drop_duplicates(subset=['field_identifier'], keep='last')
-                else:
-                    df_master = df_combined
+                df_master = df_combined
             logging.info(f"Merged deltas. New Silver Master has {len(df_master)} records.")
     else:
         logging.info("No Silver Master exists. Creating new from Deltas.")
