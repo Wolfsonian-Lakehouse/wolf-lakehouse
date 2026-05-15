@@ -28,7 +28,8 @@ def create_views():
         'islandora_raw': '/app/data/raw/islandora/islandora_lookup.parquet',
         'proficio_missing_objects': '/app/data/gold/missing_objects.parquet',
         'proficio_qa_failures': '/app/data/gold/proficio_qa_failures.parquet',
-        'gold_unified_catalog': '/app/data/gold/unified_catalog.parquet'
+        'gold_unified_catalog': '/app/data/gold/unified_catalog.parquet',
+        'gold_normalized_catalog': '/app/data/gold/unified_catalog_normalized.parquet'
     }
     
     for view_name, parquet_path in views_to_create.items():
