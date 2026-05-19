@@ -42,11 +42,11 @@ The Wolfsonian Lakehouse is an automated, incremental ELT (Extract, Load, Transf
 
 | Source | System | Records | Method |
 |---|---|---|---|
-| **Alma** | Ex Libris Library Management | ~54,983 | Binary MARC (`.mrc`) file parsing via PyMARC |
-| **Proficio** | Museum Collection Database | ~60,566 | Kerberos-authenticated SQL Server via ODBC |
-| **Islandora** | Public Digital Archive | ~265,193 | Paginated REST API with concurrent fetching |
-| **Unified Gold Catalog** | Merged output | ~115,000 | Alma + Proficio aligned and concatenated |
-| **Normalized Gold Catalog** | Analytics-ready output | ~115,000 | Harmonized genres, dates, creators & titles |
+| **Alma** | Ex Libris Library Management | 54,983 | Binary MARC (`.mrc`) file parsing via PyMARC |
+| **Proficio** | Museum Collection Database | 60,566 | Kerberos-authenticated SQL Server via ODBC |
+| **Islandora** | Public Digital Archive | 265,698 | Paginated REST API with concurrent fetching |
+| **Unified Gold Catalog** | Merged output | 115,549 | Alma + Proficio aligned and concatenated |
+| **Normalized Gold Catalog** | Analytics-ready output | 115,549 | Harmonized genres, dates, creators & titles |
 
 ---
 
@@ -202,3 +202,9 @@ docker compose stop metabase
 docker compose run --rm lakehouse python etl-pipelines/build_duckdb_views.py
 docker compose start metabase
 ```
+
+---
+
+## ✍️ Author
+**Andrius Aukstuolis**  
+*Lead Data Engineer*
