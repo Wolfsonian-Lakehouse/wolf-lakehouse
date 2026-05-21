@@ -147,6 +147,39 @@ def normalize_title(val):
 
 
 # ---------------------------------------------------------------------------
+# PLACE PUBLISHED NORMALIZATION
+# Cleans up MARC brackets, trailing punctuation, and "unknown" variants.
+# ---------------------------------------------------------------------------
+def normalize_place_published(val):
+    if pd.isna(val) or str(val).strip() == '':
+        return pd.NA
+        
+    val_str = str(val).strip()
+    
+    # Remove leading brackets and quotes
+    val_str = re.sub(r'^\[?\"?\[?', '', val_str)
+    
+    # Remove trailing brackets, quotes, and punctuation
+    val_str = re.sub(r'[\]\"\'.,;:!?\s]+$', '', val_str)
+    
+    # Handle "Place of publication not identified" variants
+    lower_val = val_str.lower()
+    if 'place of publication not identified' in lower_val or 's.l' in lower_val or 's.i.' in lower_val or 'n.l.' in lower_val:
+        return 'Unknown'
+        
+    if not val_str or val_str in ['?', '-']:
+        return 'Unknown'
+        
+    # Handle hierarchical pipes (e.g. "United States |New York |New York")
+    val_str = val_str.replace(' |', ', ').replace('|', ', ')
+    
+    # Clean up any double commas or trailing commas from empty pipe sections
+    val_str = re.sub(r',\s*,', ',', val_str)
+    val_str = val_str.strip(' ,')
+    
+    return val_str
+
+# ---------------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -180,6 +213,11 @@ if __name__ == '__main__':
     if 'field_linked_agent' in df.columns:
         df['field_linked_agent'] = df['field_linked_agent'].apply(normalize_creator)
         logging.info('✅ Normalized field_linked_agent.')
+
+    # --- Place Published ---
+    if 'field_place_published' in df.columns:
+        df['field_place_published'] = df['field_place_published'].apply(normalize_place_published)
+        logging.info('✅ Normalized field_place_published.')
 
     # --- Dates: extract derived year + decade columns for any date fields ---
     date_columns = [
