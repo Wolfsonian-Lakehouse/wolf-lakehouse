@@ -99,6 +99,19 @@ if __name__ == "__main__":
         
     df['field_subject'] = df.apply(merge_subjects, axis=1)
 
+    # Construct field_note (from 700 subfields)
+    def build_field_note(row):
+        note_parts = []
+        subfields = ['n', 'x', 'p', 't', '4', 'k', '5', 'e', 'r', 'c', 'l', 'v', 'o', 'i', 'm', 'j', '6', 'b', '0', 'w', '1', 'd', 's', '3', 'f', 'q']
+        for sf in subfields:
+            field = f"new_700_{sf}"
+            if field in row and pd.notna(row[field]):
+                val = str(row[field]).strip()
+                if val: note_parts.append(val)
+        return ' | '.join(note_parts) if note_parts else pd.NA
+        
+    df['field_note'] = df.apply(build_field_note, axis=1)
+
     # Construct field_subject_pictured
     def merge_subjects_pictured(row):
         subjects = []
@@ -130,6 +143,22 @@ if __name__ == "__main__":
     df['field_resource_type'] = 'Collection'
     df['field_model'] = 'Paged Content'
     df['field_collection_type'] = 'Library'
+    
+    # Apply text transformations (from MASTER notebook)
+    if 'field_identifier' in df.columns:
+        df['field_identifier'] = df['field_identifier'].str.replace('Local', '', regex=False).str.replace('local', '', regex=False).str.replace('@', ' ', regex=False)
+    if 'title' in df.columns:
+        df['title'] = df['title'].str.replace('/', '', regex=False).str.replace('--', '', regex=False)
+    if 'field_genre' in df.columns:
+        df['field_genre'] = df['field_genre'].str.replace('.', '', regex=False)
+    if 'field_place_published' in df.columns:
+        df['field_place_published'] = df['field_place_published'].str.replace(':', '', regex=False)
+    if 'field_physical_form' in df.columns:
+        df['field_physical_form'] = df['field_physical_form'].str.replace('.', '', regex=False)
+    if 'field_language' in df.columns:
+        df['field_language'] = df['field_language'].str.replace('.', '', regex=False)
+    if 'field_geographic_subject' in df.columns:
+        df['field_geographic_subject'] = df['field_geographic_subject'].str.replace('.', '', regex=False)
     
     # 1. Drop completely empty columns (very common in MARC dumps)
     initial_cols = len(df.columns)
