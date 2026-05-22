@@ -74,6 +74,8 @@ def normalize_subject(val):
         return pd.NA
     # If it's a pipe-separated list, clean each item
     parts = [p.strip().rstrip('.') for p in str(val).split('|')]
+    # Remove 'subject:' prefix if it exists
+    parts = [re.sub(r'^subject:', '', p, flags=re.IGNORECASE).strip() for p in parts]
     return ' | '.join([p for p in parts if p]) if parts else pd.NA
 
 
