@@ -22,6 +22,7 @@ export default function Home() {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [filteredCount, setFilteredCount] = useState(0);
   const [debugInfo, setDebugInfo] = useState<string>("");
   const [activeQuery, setActiveQuery] = useState<string>("");
 
@@ -51,10 +52,10 @@ export default function Home() {
 
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const target = entries[0];
-    if (target.isIntersecting && !loading && !isAppending && results.length > 0 && results.length < totalCount) {
+    if (target.isIntersecting && !loading && !isAppending && results.length > 0 && results.length < filteredCount) {
       setPage((prev) => prev + 1);
     }
-  }, [loading, isAppending, results.length, totalCount]);
+  }, [loading, isAppending, results.length, filteredCount]);
 
   useEffect(() => {
     const option = { root: null, rootMargin: "400px", threshold: 0 };
@@ -117,10 +118,12 @@ export default function Home() {
       setActiveQuery(dataQuery);
 
       const countQuery = `SELECT count(*) as total FROM catalog ${whereClause}`;
+      const globalCountQuery = `SELECT count(*) as total FROM catalog`;
 
-      const [data, countData] = await Promise.all([
+      const [data, countData, globalCountData] = await Promise.all([
         runQuery(dataQuery),
-        runQuery(countQuery)
+        runQuery(countQuery),
+        runQuery(globalCountQuery)
       ]);
       
       if (data) {
@@ -132,7 +135,10 @@ export default function Home() {
       }
       
       if (countData && countData.length > 0) {
-        setTotalCount(Number(countData[0].total));
+        setFilteredCount(Number(countData[0].total));
+      }
+      if (globalCountData && globalCountData.length > 0) {
+        setTotalCount(Number(globalCountData[0].total));
       }
       
       setDebugInfo(JSON.stringify({
@@ -397,6 +403,15 @@ export default function Home() {
 
         {/* Collection Grid */}
         <main>
+          <div className="flex justify-between items-end mb-6 border-b border-white/20 pb-4">
+            <h2 className="text-white font-bold tracking-widest text-sm uppercase">
+              RESULTS GRID
+            </h2>
+            <div className="text-mca-cyan font-mono text-xs uppercase tracking-widest bg-mca-cyan/10 px-3 py-1.5 border border-mca-cyan/20">
+              <span className="font-bold text-white mr-2">{isReady ? filteredCount.toLocaleString() : '---'}</span> 
+              MATCHES FOUND
+            </div>
+          </div>
           {loading ? (
             <div className="flex flex-col items-center justify-center py-32 space-y-6">
               <div className="animate-spin h-10 w-10 border-2 border-white border-t-mca-cyan rounded-none" />
@@ -475,7 +490,7 @@ export default function Home() {
           )}
 
           {/* Infinite Scroll Loader */}
-          {results.length > 0 && results.length < totalCount && (
+          {results.length > 0 && results.length < filteredCount && (
             <div ref={loaderRef} className="py-12 flex justify-center items-center w-full border-t border-white/20 col-span-full">
               {isAppending ? (
                 <div className="flex flex-col items-center space-y-4">
@@ -488,9 +503,9 @@ export default function Home() {
             </div>
           )}
 
-          {results.length > 0 && results.length >= totalCount && (
+          {results.length > 0 && results.length >= filteredCount && (
             <div className="py-12 text-center border-t border-white/20 text-[10px] text-slate-500 font-bold tracking-widest uppercase col-span-full">
-              END OF CATALOG REACHED ({results.length} RECORDS)
+              END OF CATALOG REACHED ({results.length} MATCHES)
             </div>
           )}
         </main>
