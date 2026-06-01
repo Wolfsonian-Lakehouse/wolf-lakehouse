@@ -31,6 +31,11 @@ export default function Home() {
   const [isAppending, setIsAppending] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
 
+  // Modal State
+  const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(false);
+
   const executeNewSearch = () => {
     setPage(1);
     handleSearch(1);
@@ -154,6 +159,24 @@ export default function Home() {
     
     setLoading(false);
     setIsAppending(false);
+  };
+
+  const handleRecordClick = async (identifier: string) => {
+    setIsModalOpen(true);
+    setIsModalLoading(true);
+    setSelectedRecord(null);
+    try {
+      const query = `SELECT * FROM catalog WHERE field_identifier = '${identifier.replace(/'/g, "''")}' LIMIT 1`;
+      setActiveQuery(query);
+      const data = await runQuery(query);
+      if (data && data.length > 0) {
+        setSelectedRecord(data[0]);
+      }
+    } catch (error: any) {
+      console.error("Modal fetch error:", error);
+      setDebugInfo((prev: string) => prev + `\nModal Error: ${error?.message || error}`);
+    }
+    setIsModalLoading(false);
   };
 
   return (
@@ -424,7 +447,8 @@ export default function Home() {
               {results.map((item, idx) => (
                 <article 
                   key={idx} 
-                  className="bg-mca-black border-r border-b border-white/20 hover:bg-mca-dark/50 transition-all duration-200 flex flex-col group p-6 space-y-6"
+                  className="bg-mca-black border-r border-b border-white/20 hover:bg-mca-dark/50 transition-all duration-200 flex flex-col group p-6 space-y-6 cursor-pointer relative"
+                  onClick={() => handleRecordClick(item.field_identifier)}
                 >
                   
                   {/* Image Area - Stark Fit Layout */}
@@ -537,6 +561,94 @@ export default function Home() {
           <span>Built by <span className="text-slate-400">Andrius Aukstuolis</span></span>
         </div>
       </footer>
+
+      {/* Full-Screen Brutalist Metadata Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-stretch bg-mca-black overflow-hidden font-mono text-white animate-in fade-in duration-200">
+          
+          {/* Close Button Area */}
+          <div className="absolute top-0 right-0 p-6 z-50">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="bg-white text-mca-black font-black uppercase tracking-widest px-6 py-3 border-2 border-white hover:bg-mca-cyan transition-colors text-sm"
+            >
+              [X] CLOSE
+            </button>
+          </div>
+
+          <div className="flex flex-col md:flex-row w-full h-full">
+            
+            {/* Left side - Image */}
+            <div className="w-full md:w-1/2 bg-black border-b md:border-b-0 md:border-r border-white/20 relative flex items-center justify-center p-8">
+              {isModalLoading ? (
+                <div className="animate-spin h-16 w-16 border-4 border-white border-t-mca-cyan rounded-none" />
+              ) : selectedRecord ? (
+                <>
+                  <img 
+                    src={`/images/${(selectedRecord.field_identifier || "").split(';')[0].trim()}.jpg`}
+                    alt={selectedRecord.title}
+                    className="object-contain w-full h-full max-h-[80vh] drop-shadow-2xl z-10"
+                    onError={(e: any) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <div className="absolute hidden inset-0 flex flex-col items-center justify-center bg-mca-black text-slate-600 text-lg uppercase font-bold tracking-widest space-y-4">
+                    <span>[ NO IMAGE DATA FOUND ]</span>
+                  </div>
+                </>
+              ) : null}
+            </div>
+
+            {/* Right side - Raw Metadata Ledger */}
+            <div className="w-full md:w-1/2 h-full overflow-y-auto bg-mca-black p-8 md:p-12">
+              <div className="max-w-2xl mx-auto space-y-12 pb-32">
+                
+                {isModalLoading ? (
+                  <div className="space-y-4 animate-pulse">
+                    <div className="h-8 bg-white/10 w-3/4"></div>
+                    <div className="h-4 bg-white/10 w-1/2"></div>
+                    <div className="h-4 bg-white/10 w-full mt-12"></div>
+                    <div className="h-4 bg-white/10 w-full"></div>
+                    <div className="h-4 bg-white/10 w-5/6"></div>
+                  </div>
+                ) : selectedRecord ? (
+                  <>
+                    <header className="space-y-4 border-b-4 border-white pb-6">
+                      <div className="text-mca-cyan text-xs font-bold tracking-widest uppercase">
+                        // RECORD: {selectedRecord.field_identifier}
+                      </div>
+                      <h2 className="text-3xl md:text-5xl font-black font-display uppercase tracking-tight leading-tight">
+                        {selectedRecord.title}
+                      </h2>
+                    </header>
+
+                    <div className="space-y-8">
+                      {Object.entries(selectedRecord)
+                        .filter(([key, val]) => val !== null && val !== "" && key !== "has_image" && key !== "title")
+                        .map(([key, val], i) => (
+                          <div key={i} className="flex flex-col space-y-2 group">
+                            <span className="text-[10px] text-mca-cyan font-bold tracking-widest uppercase break-all">
+                              {key}
+                            </span>
+                            <span className="text-sm md:text-base text-slate-300 font-light leading-relaxed break-words whitespace-pre-wrap">
+                              {String(val)}
+                            </span>
+                          </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-red-500 font-bold uppercase tracking-widest">
+                    Failed to load record metadata.
+                  </div>
+                )}
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      )}
 
     </div>
   );
