@@ -14,6 +14,7 @@
 ---
 
 ## 📖 Table of Contents
+- [Quick Links](#-quick-links)
 - [About the Project](#-about-the-project)
 - [Architecture & Tech Stack](#-architecture--tech-stack)
 - [Data Sources & Volumes](#-data-sources--volumes)
@@ -21,6 +22,13 @@
 - [Project Structure](#-project-structure)
 - [Pipeline Execution](#-pipeline-execution)
 - [Operational Notes](#-operational-notes)
+
+---
+
+## 🔗 Quick Links
+- **Lakehouse Catalog**: [lakehouse.wolfsonian.org](https://lakehouse.wolfsonian.org)
+- **Metabase**: [metabase.wolfsonian.org](https://metabase.wolfsonian.org)
+- **Prefect Dashboard**: [http://star.wolfson.fiu.edu:4200/runs](http://star.wolfson.fiu.edu:4200/runs)
 
 ---
 
@@ -42,11 +50,11 @@ The Wolfsonian Lakehouse is an automated, incremental ELT (Extract, Load, Transf
 
 | Source | System | Records | Method |
 |---|---|---|---|
-| **Alma** | Ex Libris Library Management | 54,983 | Binary MARC (`.mrc`) file parsing via PyMARC |
+| **Alma** | Ex Libris Library Management | 54,996 | Binary MARC (`.mrc`) file parsing via PyMARC |
 | **Proficio** | Museum Collection Database | 60,566 | Kerberos-authenticated SQL Server via ODBC |
 | **Islandora** | Public Digital Archive | 265,698 | Paginated REST API with concurrent fetching |
-| **Unified Gold Catalog** | Merged output | 115,549 | Alma + Proficio aligned and concatenated |
-| **Normalized Gold Catalog** | Analytics-ready output | 115,549 | Harmonized genres, dates, creators & titles |
+| **Unified Gold Catalog** | Merged output | 115,562 | Alma + Proficio aligned and concatenated |
+| **Normalized Gold Catalog** | Analytics-ready output | 115,562 | Harmonized genres, dates, creators & titles |
 
 ---
 
@@ -100,6 +108,7 @@ wolf-lakehouse/
 ├── docker-compose.yml           # The Master Switch for orchestration
 ├── Dockerfile                   # Builds the Python 3.10 environment + ODBC/Kerberos
 ├── Dockerfile.metabase          # Custom Ubuntu image for Metabase DuckDB support
+├── frontend-explorer/           # Next.js web application for data exploration
 ├── etl-pipelines/               # Core Extraction & Transformation Microservices
 │   ├── build_duckdb_views.py
 │   ├── export_alma_to_workbench.py
