@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useDuckDB } from "../hooks/useDuckDB";
 
 export default function Home() {
@@ -25,12 +25,43 @@ export default function Home() {
   const [debugInfo, setDebugInfo] = useState<string>("");
   const [activeQuery, setActiveQuery] = useState<string>("");
 
+  // Infinite Scroll State
+  const [page, setPage] = useState(1);
+  const [isAppending, setIsAppending] = useState(false);
+  const loaderRef = useRef<HTMLDivElement>(null);
+
+  const executeNewSearch = () => {
+    setPage(1);
+    handleSearch(1);
+  };
+
   useEffect(() => {
     if (isReady) {
-      handleSearch();
+      setPage(1);
+      handleSearch(1);
       fetchFacets();
     }
   }, [isReady, selectedSystem, selectedGenre, hasImageOnly, selectedCreator, selectedSubject, selectedPlace, minYear, maxYear]);
+
+  useEffect(() => {
+    if (page > 1) {
+      handleSearch(page);
+    }
+  }, [page]);
+
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const target = entries[0];
+    if (target.isIntersecting && !loading && !isAppending && results.length > 0 && results.length < totalCount) {
+      setPage((prev) => prev + 1);
+    }
+  }, [loading, isAppending, results.length, totalCount]);
+
+  useEffect(() => {
+    const option = { root: null, rootMargin: "400px", threshold: 0 };
+    const observer = new IntersectionObserver(handleObserver, option);
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [handleObserver]);
 
   const fetchFacets = async () => {
     if (!isReady || topCreators.length > 0) return; // Only fetch once
@@ -48,62 +79,61 @@ export default function Home() {
     }
   };
 
-  const handleSearch = async () => {
+  const handleSearch = async (targetPage: number = page) => {
     if (!isReady) return;
-    setLoading(true);
+    
+    if (targetPage === 1) {
+      setLoading(true);
+    } else {
+      setIsAppending(true);
+    }
     
     try {
-      let query = `
-        SELECT title, field_identifier, field_collection_type, field_genre, field_description_long, source_system, has_image
-        FROM catalog 
-        WHERE title IS NOT NULL
-      `;
+      let whereClause = `WHERE title IS NOT NULL`;
       
       if (searchTerm) {
-        // Safe string escaping for basic SQL injection protection in browser search
         const escapedSearch = searchTerm.replace(/'/g, "''").toLowerCase();
-        query += ` AND (lower(title) LIKE '%${escapedSearch}%' OR lower(field_description_long) LIKE '%${escapedSearch}%')`;
+        whereClause += ` AND (lower(title) LIKE '%${escapedSearch}%' OR lower(field_description_long) LIKE '%${escapedSearch}%')`;
       }
+      if (selectedSystem !== "ALL") whereClause += ` AND source_system = '${selectedSystem}'`;
+      if (selectedGenre !== "ALL") whereClause += ` AND field_genre = '${selectedGenre}'`;
+      if (hasImageOnly) whereClause += ` AND has_image = true`;
+      if (selectedCreator !== "ALL") whereClause += ` AND field_linked_agent = '${selectedCreator.replace(/'/g, "''")}'`;
+      if (selectedSubject !== "ALL") whereClause += ` AND field_subject = '${selectedSubject.replace(/'/g, "''")}'`;
+      if (selectedPlace !== "ALL") whereClause += ` AND field_place_published = '${selectedPlace.replace(/'/g, "''")}'`;
+      if (minYear && !isNaN(parseInt(minYear))) whereClause += ` AND year_created >= ${parseInt(minYear)}`;
+      if (maxYear && !isNaN(parseInt(maxYear))) whereClause += ` AND year_created <= ${parseInt(maxYear)}`;
+      
+      const limit = 48;
+      const offset = (targetPage - 1) * limit;
 
-      if (selectedSystem !== "ALL") {
-        query += ` AND source_system = '${selectedSystem}'`;
-      }
+      const dataQuery = `
+        SELECT title, field_identifier, field_collection_type, field_genre, field_description_long, source_system, has_image
+        FROM catalog 
+        ${whereClause}
+        ORDER BY has_image DESC, title ASC LIMIT ${limit} OFFSET ${offset}
+      `;
+      
+      setActiveQuery(dataQuery);
 
-      if (selectedGenre !== "ALL") {
-        query += ` AND field_genre = '${selectedGenre}'`;
-      }
+      const countQuery = `SELECT count(*) as total FROM catalog ${whereClause}`;
 
-      if (hasImageOnly) {
-        query += ` AND has_image = true`;
-      }
-
-      if (selectedCreator !== "ALL") {
-        query += ` AND field_linked_agent = '${selectedCreator.replace(/'/g, "''")}'`;
-      }
-      if (selectedSubject !== "ALL") {
-        query += ` AND field_subject = '${selectedSubject.replace(/'/g, "''")}'`;
-      }
-      if (selectedPlace !== "ALL") {
-        query += ` AND field_place_published = '${selectedPlace.replace(/'/g, "''")}'`;
-      }
-
-      if (minYear && !isNaN(parseInt(minYear))) {
-        query += ` AND year_created >= ${parseInt(minYear)}`;
-      }
-      if (maxYear && !isNaN(parseInt(maxYear))) {
-        query += ` AND year_created <= ${parseInt(maxYear)}`;
+      const [data, countData] = await Promise.all([
+        runQuery(dataQuery),
+        runQuery(countQuery)
+      ]);
+      
+      if (data) {
+        if (targetPage === 1) {
+          setResults(data);
+        } else {
+          setResults(prev => [...prev, ...data]);
+        }
       }
       
-      // Sort: items with an identifier (i.e. likely have an image) come first, then alphabetically
-      query += ` ORDER BY has_image DESC, title ASC LIMIT 48`;
-      
-      setActiveQuery(query);
-
-      const data = await runQuery(query);
-      const countData = await runQuery(`SELECT count(*) as total FROM catalog`);
-      
-      if (data) setResults(data);
-      if (countData && countData.length > 0) setTotalCount(countData[0].total);
+      if (countData && countData.length > 0) {
+        setTotalCount(Number(countData[0].total));
+      }
       
       setDebugInfo(JSON.stringify({
         dataLength: data?.length,
@@ -117,6 +147,7 @@ export default function Home() {
     }
     
     setLoading(false);
+    setIsAppending(false);
   };
 
   return (
@@ -187,11 +218,11 @@ export default function Home() {
               className="flex-grow bg-mca-black border-2 border-white rounded-none px-6 py-4 text-base font-bold tracking-wide focus:outline-none focus:bg-mca-dark transition-all placeholder:text-mca-border uppercase text-white"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === 'Enter' && executeNewSearch()}
             />
             
             <button 
-              onClick={handleSearch}
+              onClick={executeNewSearch}
               disabled={!isReady}
               className="bg-white hover:bg-mca-cyan text-mca-black font-black uppercase tracking-widest px-10 py-4 rounded-none border-2 border-white hover:border-mca-cyan transition-all duration-200 cursor-pointer disabled:opacity-30 shrink-0 text-sm active:translate-y-1"
             >
@@ -440,6 +471,26 @@ export default function Home() {
                   The query returned zero rows. Clean your filter values or enter a different search phrase to scan the catalog database.
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Infinite Scroll Loader */}
+          {results.length > 0 && results.length < totalCount && (
+            <div ref={loaderRef} className="py-12 flex justify-center items-center w-full border-t border-white/20 col-span-full">
+              {isAppending ? (
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="animate-spin h-6 w-6 border-2 border-white border-t-mca-cyan rounded-none" />
+                  <span className="text-[10px] text-mca-cyan font-bold tracking-widest uppercase">Fetching more records...</span>
+                </div>
+              ) : (
+                <div className="h-6" />
+              )}
+            </div>
+          )}
+
+          {results.length > 0 && results.length >= totalCount && (
+            <div className="py-12 text-center border-t border-white/20 text-[10px] text-slate-500 font-bold tracking-widest uppercase col-span-full">
+              END OF CATALOG REACHED ({results.length} RECORDS)
             </div>
           )}
         </main>
