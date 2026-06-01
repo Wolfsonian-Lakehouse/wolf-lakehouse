@@ -28,7 +28,7 @@ export default function Home() {
     
     try {
       let query = `
-        SELECT title, field_identifier, field_collection_type, field_genre, field_description_long, source_system
+        SELECT title, field_identifier, field_collection_type, field_genre, field_description_long, source_system, has_image
         FROM catalog 
         WHERE title IS NOT NULL
       `;
@@ -48,7 +48,7 @@ export default function Home() {
       }
       
       // Sort: items with an identifier (i.e. likely have an image) come first, then alphabetically
-      query += ` ORDER BY (field_identifier IS NOT NULL AND field_identifier != '') DESC, title ASC LIMIT 48`;
+      query += ` ORDER BY has_image DESC, title ASC LIMIT 48`;
       
       setActiveQuery(query);
 

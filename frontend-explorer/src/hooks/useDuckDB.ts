@@ -44,7 +44,8 @@ export function useDuckDB() {
               field_collection_type, 
               field_genre, 
               field_description_long, 
-              source_system 
+              source_system,
+              has_image
             FROM read_parquet('normalized_catalog.parquet');
           `);
           console.log("DuckDB initialized and Parquet file mounted!");

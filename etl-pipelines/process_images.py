@@ -192,3 +192,21 @@ if __name__ == "__main__":
     print(f"   Not Found in NFS: {not_found_count}")
     print(f"   Errors: {error_count}")
     print(f"   Total JPEGs stored locally: {len(list(OUTPUT_DIR.glob('*.jpg')))}")
+
+    # 3. Update the catalog with has_image flag
+    print("Updating catalog with has_image flag...")
+    def check_has_image(identifier):
+        if pd.isna(identifier) or not identifier:
+            return False
+        identifier_str = str(identifier).strip()
+        id_parts = [p.strip() for p in identifier_str.split(';') if p.strip()]
+        primary_id = id_parts[0] if id_parts else identifier_str
+        if len(primary_id) > 200:
+            return False
+        return f"{primary_id}.jpg" in existing_dest_images
+
+    df['has_image'] = df['field_identifier'].apply(check_has_image)
+    
+    # Save the updated dataframe back to parquet
+    df.to_parquet(PARQUET_FILE, index=False)
+    print("✅ Catalog updated with has_image flag.")
