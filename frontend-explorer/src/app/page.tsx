@@ -8,6 +8,8 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSystem, setSelectedSystem] = useState("ALL");
   const [selectedGenre, setSelectedGenre] = useState("ALL");
+  const [selectedDecade, setSelectedDecade] = useState("ALL");
+  const [hasImageOnly, setHasImageOnly] = useState(false);
   
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -15,12 +17,11 @@ export default function Home() {
   const [debugInfo, setDebugInfo] = useState<string>("");
   const [activeQuery, setActiveQuery] = useState<string>("");
 
-  // Fetch initial data when DB is ready or when filters change
   useEffect(() => {
     if (isReady) {
       handleSearch();
     }
-  }, [isReady, selectedSystem, selectedGenre]);
+  }, [isReady, selectedSystem, selectedGenre, selectedDecade, hasImageOnly]);
 
   const handleSearch = async () => {
     if (!isReady) return;
@@ -45,6 +46,14 @@ export default function Home() {
 
       if (selectedGenre !== "ALL") {
         query += ` AND field_genre = '${selectedGenre}'`;
+      }
+
+      if (selectedDecade !== "ALL") {
+        query += ` AND decade_created = ${selectedDecade}`;
+      }
+
+      if (hasImageOnly) {
+        query += ` AND has_image = true`;
       }
       
       // Sort: items with an identifier (i.e. likely have an image) come first, then alphabetically
@@ -185,10 +194,12 @@ export default function Home() {
               <div className="flex flex-wrap gap-2">
                 {[
                   { key: "ALL", label: "ALL GENRES" },
-                  { key: "POSTER", label: "POSTERS" },
                   { key: "BOOKS", label: "BOOKS" },
+                  { key: "DESIGN DRAWING", label: "DESIGN DRAWINGS" },
+                  { key: "POSTCARD", label: "POSTCARDS" },
+                  { key: "PHOTOGRAPH", label: "PHOTOGRAPHS" },
+                  { key: "POSTER", label: "POSTERS" },
                   { key: "PAMPHLET", label: "PAMPHLETS" },
-                  { key: "DRAWING", label: "DRAWINGS" },
                   { key: "PRINT", label: "PRINTS" },
                   { key: "OBJECT", label: "MUSEUM OBJECTS" }
                 ].map((opt) => (
@@ -200,6 +211,50 @@ export default function Home() {
                     {opt.label}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Filter 3: Decade Created */}
+            <div className="space-y-3 border-t border-white/20 pt-6">
+              <span className="block text-xs uppercase tracking-wider font-extrabold text-mca-cyan">
+                // DECADE CREATED
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { key: "ALL", label: "ALL DECADES" },
+                  { key: "1880", label: "1880s" },
+                  { key: "1890", label: "1890s" },
+                  { key: "1900", label: "1900s" },
+                  { key: "1910", label: "1910s" },
+                  { key: "1920", label: "1920s" },
+                  { key: "1930", label: "1930s" },
+                  { key: "1940", label: "1940s" },
+                  { key: "1950", label: "1950s" }
+                ].map((opt) => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setSelectedDecade(opt.key)}
+                    className={`px-3 py-2 border text-[11px] font-bold uppercase transition-all duration-150 cursor-pointer ${selectedDecade === opt.key ? 'bg-mca-cyan border-mca-cyan text-mca-black font-extrabold' : 'border-white/10 text-slate-400 hover:border-white/40 hover:text-white'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filter 4: Media Settings */}
+            <div className="space-y-3 border-t border-white/20 pt-6">
+              <span className="block text-xs uppercase tracking-wider font-extrabold text-mca-cyan">
+                // MEDIA SETTINGS
+              </span>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setHasImageOnly(!hasImageOnly)}
+                  className={`px-4 py-2 border text-[11px] font-bold uppercase transition-all duration-150 cursor-pointer flex items-center space-x-2 ${hasImageOnly ? 'bg-white border-white text-mca-black font-extrabold' : 'border-white/20 text-slate-400 hover:border-white hover:text-white'}`}
+                >
+                  <span className={`h-2 w-2 rounded-full ${hasImageOnly ? 'bg-mca-cyan' : 'bg-slate-600'}`}></span>
+                  <span>ONLY SHOW RECORDS WITH IMAGES</span>
+                </button>
               </div>
             </div>
 
