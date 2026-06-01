@@ -28,7 +28,6 @@
 ## 🔗 Quick Links
 - **Lakehouse Catalog**: [lakehouse.wolfsonian.org](https://lakehouse.wolfsonian.org)
 - **Metabase**: [metabase.wolfsonian.org](https://metabase.wolfsonian.org)
-- **Prefect Dashboard**: [http://star.wolfson.fiu.edu:4200/runs](http://star.wolfson.fiu.edu:4200/runs)
 
 ---
 
