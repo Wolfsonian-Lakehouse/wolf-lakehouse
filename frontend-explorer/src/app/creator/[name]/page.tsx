@@ -194,7 +194,7 @@ export default function CreatorPage({ params }: { params: Promise<{ name: string
                       </h3>
                       
                       <p className="text-slate-400 text-xs leading-relaxed font-sans font-light line-clamp-4">
-                        {item.field_description_long || 'No historical description logged.'}
+                        {item.field_description_long || 'No description at this time.'}
                       </p>
                       
                       <div className="flex flex-col space-y-1 pt-3 text-[10px] uppercase font-bold tracking-widest text-slate-500 border-t border-white/10 mt-3">
