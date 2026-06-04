@@ -4,8 +4,12 @@ import shutil
 from pathlib import Path
 import pandas as pd
 from tqdm import tqdm
-from PIL import Image
+from PIL import Image, ImageFile
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Configure PIL to allow large images and truncated files
+Image.MAX_IMAGE_PIXELS = None
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # --- CONFIGURATION ---
 DIGITAL_IMAGES_DIR = Path('/app/data/raw/digital_images')
@@ -73,8 +77,10 @@ def process_single_row(row):
             
         for subdir in search_subdirs:
             # O(1) in-memory check to bypass expensive NFS metadata network requests
-            if candidate in existing_folders.get(subdir, set()):
-                obj_dir = DIGITAL_IMAGES_DIR / subdir / candidate
+            norm_candidate = normalize_name(candidate)
+            if norm_candidate in existing_folders.get(subdir, {}):
+                real_folder_name = existing_folders[subdir][norm_candidate]
+                obj_dir = DIGITAL_IMAGES_DIR / subdir / real_folder_name
                 if obj_dir.is_dir():
                     # Find TIFF, JPEG, PNG or GIF files inside (case-insensitive glob)
                     image_files = []
@@ -142,14 +148,15 @@ if __name__ == "__main__":
         path = DIGITAL_IMAGES_DIR / subdir
         if path.exists() and path.is_dir():
             try:
-                # Use a set for O(1) lookups
-                existing_folders[subdir] = set(os.listdir(path))
+                # Use a dict mapped by normalized name for robust O(1) lookups
+                folders = os.listdir(path)
+                existing_folders[subdir] = {normalize_name(f): f for f in folders}
                 print(f"  Cached {len(existing_folders[subdir])} folders in {subdir}")
             except Exception as e:
                 print(f"  ⚠️ Failed to cache {subdir}: {e}")
-                existing_folders[subdir] = set()
+                existing_folders[subdir] = {}
         else:
-            existing_folders[subdir] = set()
+            existing_folders[subdir] = {}
     
     # Cache existing local output images to prevent slow exists() filesystem lookups
     print("Caching local processed images...")
