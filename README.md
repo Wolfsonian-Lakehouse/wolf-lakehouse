@@ -70,8 +70,29 @@ The Wolfsonian Lakehouse is an automated, incremental ELT (Extract, Load, Transf
 * **Parallel Image Ingestion & Conversion:** Ingests raw `.tif`/`.tiff` catalog images from the mounted NFS share, converts them to JPEG, and optimizes them for the frontend. Using a `ThreadPoolExecutor` with 16 parallel workers, it concurrently reads and encodes images on the fly. It utilizes dual-layer in-memory caching (caching both local images and NFS directories at boot) to skip already processed images in O(1) time.
 * **Storage Protection & Web Resizing:** Converts large ~10MB+ TIFFs into highly compressed JPEGs restricted to a maximum of 1200px on the longest side and saved at quality 80. This reduces file size by ~20x-50x (down to ~200KB per image), allowing the full ~50k image catalog to fit in less than 13GB of local disk space while drastically accelerating webpage loading times.
 * **Robust Workflow Orchestration:** Uses Prefect to manage the ETL pipeline. The monolithic scripts have been completely decoupled into a 16-node Directed Acyclic Graph (DAG), providing an incredibly granular UI dashboard for monitoring, task-level asynchronous execution, and real-time metric summaries at the end of every flow.
-* **Serverless Frontend Discovery:** The Next.js web application leverages DuckDB WebAssembly to provide instant, zero-latency catalog exploration entirely in the browser. Advanced features include an interactive historical timeline, an algorithmic "Surprise Me" engine for serendipitous visual discovery, and dynamically generated Creator Dossiers—all executed without backend server load.
-* **Browser-Native Staff Collections:** Staff can curate custom lists of catalog records directly within the browser using `localStorage`. The brutalist-themed Collection Drawer allows users to select items, manage their lists without logging in, and export their curated sets instantaneously to CSV for downstream research or sharing.
+---
+
+## 🔍 The Frontend Explorer
+
+The original purpose of the Lakehouse Frontend Explorer was to solve the institution's most critical data silo problem: bridging the gap between the library’s Alma system and the museum’s Proficio system. Instead of forcing researchers and staff to use two separate, slow, and outdated legacy platforms, the Explorer unifies all 115,000+ records into a single, lightning-fast public entry point. By leveraging serverless browser technology (DuckDB WebAssembly), it entirely bypasses the need for expensive third-party vendors and backend servers, delivering instantaneous search and visual discovery at zero ongoing computing cost.
+
+### Explorer Features
+
+**Architecture & Performance**
+* **Serverless Zero-Latency Engine:** Uses DuckDB WebAssembly to download and query the compressed Parquet data directly inside the user's browser, resulting in instantaneous search results.
+* **Unified Search:** Automatically searches across both museum objects and library materials simultaneously.
+* **Cost-Free Scaling:** Because the browser does all the computational work, the application can scale to thousands of simultaneous users without increasing cloud hosting costs.
+
+**Discovery & Navigation**
+* **Interactive Historical Timeline:** Allows users to dynamically slide and filter the entire catalog by decade or specific years in real-time.
+* **"Surprise Me" Algorithmic Engine:** A serendipitous visual discovery tool that serves users a random, highly visual subset of the collection to encourage organic exploration.
+* **Dynamic Creator Dossiers:** Automatically generates dedicated landing pages that aggregate and display all cataloged works by a specific artist, designer, or author.
+* **Infinite Scroll Grid:** A high-performance, Brutalist-themed masonry grid that can render thousands of images smoothly without crashing the browser.
+
+**Staff & Researcher Tools**
+* **Browser-Native Staff Collections:** Staff can curate custom lists of catalog records directly within their browser memory (`localStorage`), allowing them to build research sets without ever needing to log in or create an account.
+* **CSV Export Engine:** With a single click, users can instantly export their curated collections into a formatted spreadsheet for exhibition planning, sharing, or downstream research.
+* **One-Click Image Downloads:** High-visibility download buttons integrated directly into the record modal, allowing staff to quickly save web-optimized JPEGs for their work.
 
 ---
 
