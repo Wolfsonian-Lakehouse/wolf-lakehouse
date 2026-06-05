@@ -129,7 +129,7 @@ export default function Home() {
       } else {
         if (searchTerm) {
         const escapedSearch = searchTerm.replace(/'/g, "''").toLowerCase();
-        whereClause += ` AND (lower(title) LIKE '%${escapedSearch}%' OR lower(field_description_long) LIKE '%${escapedSearch}%')`;
+        whereClause += ` AND (lower(title) LIKE '%${escapedSearch}%' OR lower(field_description_long) LIKE '%${escapedSearch}%' OR lower(field_identifier) LIKE '%${escapedSearch}%')`;
       }
       if (selectedSystem !== "ALL") whereClause += ` AND source_system = '${selectedSystem}'`;
       if (selectedGenre !== "ALL") whereClause += ` AND field_genre = '${selectedGenre}'`;
@@ -321,7 +321,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12 md:py-20 flex-1 w-full space-y-16">
+      <div className="w-full px-6 md:px-12 2xl:px-24 py-12 md:py-20 flex-1 space-y-16">
         
         {/* Giant MCA-Style Typography Header */}
         <header className="space-y-6">
@@ -818,7 +818,7 @@ export default function Home() {
       </div>
       {/* Footer */}
       <footer className="border-t border-white/10 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-slate-600">
+        <div className="w-full px-6 md:px-12 2xl:px-24 py-6 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-slate-600">
           <span>Wolfsonian-FIU Collection Data Lakehouse</span>
           <span>Built by <span className="text-slate-400">Andrius Aukstuolis</span></span>
         </div>

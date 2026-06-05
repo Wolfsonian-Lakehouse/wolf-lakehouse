@@ -103,7 +103,7 @@ export default function CreatorPage({ params }: { params: Promise<{ name: string
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12 md:py-20 flex-1 w-full space-y-16">
+      <div className="w-full px-6 md:px-12 2xl:px-24 py-12 md:py-20 flex-1 space-y-16">
         
         {/* Dossier Header */}
         <header className="space-y-6">
@@ -286,7 +286,7 @@ export default function CreatorPage({ params }: { params: Promise<{ name: string
 
       {/* Footer */}
       <footer className="border-t border-white/10 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-slate-600">
+        <div className="w-full px-6 md:px-12 2xl:px-24 py-6 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-slate-600">
           <span>Wolfsonian-FIU Collection Data Lakehouse</span>
           <span>Built by <span className="text-slate-400">Andrius Aukstuolis</span></span>
         </div>
