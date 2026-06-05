@@ -55,15 +55,31 @@ export function useCollection() {
       "field_physical_form", "field_extent", "field_subject", "source_system"
     ];
     
+    // Add custom columns for thumbnails
+    const exportHeaders = [...headers, "image_url", "spreadsheet_thumbnail"];
+    
     const csvRows = [];
     
     // Add headers
-    csvRows.push(headers.map(h => `"${h.replace(/"/g, '""')}"`).join(','));
+    csvRows.push(exportHeaders.map(h => `"${h.replace(/"/g, '""')}"`).join(','));
     
     // Add rows
     for (const row of collection) {
-      const values = headers.map(header => {
-        const val = row[header];
+      const primaryId = (row.field_identifier || "").split(';')[0].trim();
+      const imageUrl = row.has_image ? `https://lakehouse.wolfsonian.org/images/${primaryId}.jpg` : "";
+      
+      const values = exportHeaders.map(header => {
+        let val = "";
+        
+        if (header === "image_url") {
+          val = imageUrl;
+        } else if (header === "spreadsheet_thumbnail") {
+          // This formula renders the actual image inside a cell in Google Sheets and newer Excel versions!
+          val = imageUrl ? `=IMAGE("${imageUrl}")` : "";
+        } else {
+          val = row[header];
+        }
+        
         const escaped = (val === null || val === undefined) ? "" : String(val).replace(/"/g, '""');
         return `"${escaped}"`;
       });
