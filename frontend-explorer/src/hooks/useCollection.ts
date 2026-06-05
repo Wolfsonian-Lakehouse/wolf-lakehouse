@@ -48,11 +48,13 @@ export function useCollection() {
   const exportCsv = () => {
     if (collection.length === 0) return;
     
-    // Using predefined set of important fields to keep export clean
+    // Export all available fields as requested
     const headers = [
       "field_identifier", "title", "field_collection_type", "field_genre",
-      "field_linked_agent", "field_edtf_date_created", "field_place_published",
-      "field_physical_form", "field_extent", "field_subject", "source_system"
+      "field_description_long", "field_linked_agent", "field_subject", 
+      "field_place_published", "field_edtf_date_created", "decade_created", 
+      "year_created", "field_credit_line", "field_physical_form", 
+      "field_extent", "field_collection_note", "source_system", "id"
     ];
     
     // Add custom columns for thumbnails

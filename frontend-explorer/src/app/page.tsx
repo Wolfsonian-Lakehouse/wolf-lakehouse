@@ -724,7 +724,16 @@ export default function Home() {
                         {item.field_subject && (
                           <div className="flex space-x-2">
                             <span className="text-slate-600 w-20 shrink-0">SUBJECT</span>
-                            <span className="text-slate-300 truncate">{item.field_subject}</span>
+                            <span className="text-slate-300 truncate">
+                              {item.field_subject.split(';').map((subject: string, i: number) => (
+                                <span key={i}>
+                                  <Link href={`/subject/${encodeURIComponent(subject.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                    {subject.trim()}
+                                  </Link>
+                                  {i < item.field_subject.split(';').length - 1 ? '; ' : ''}
+                                </span>
+                              ))}
+                            </span>
                           </div>
                         )}
                         {item.field_credit_line && (
@@ -903,17 +912,67 @@ export default function Home() {
 
                     <div className="space-y-8">
                       {Object.entries(selectedRecord)
-                        .filter(([key, val]) => val !== null && val !== "" && key !== "has_image" && key !== "title")
-                        .map(([key, val], i) => (
-                          <div key={i} className="flex flex-col space-y-2 group">
-                            <span className="text-[10px] text-mca-cyan font-bold tracking-widest uppercase break-all">
-                              {key === 'id' ? 'LAKEHOUSE_INDEX' : key}
-                            </span>
-                            <span className="text-sm md:text-base text-slate-300 font-light leading-relaxed break-words whitespace-pre-wrap">
-                              {String(val)}
-                            </span>
-                          </div>
-                      ))}
+                        .filter(([key, val]) => val !== null && val !== "" && !["has_image", "title", "year_created", "source_system", "id"].includes(key))
+                        .sort(([keyA], [keyB]) => {
+                          const orderedFields = ["field_identifier", "field_collection_type", "field_extent", "field_genre", "field_description_long", "field_linked_agent", "field_subject", "field_place_published", "field_edtf_date_created", "decade_created", "field_physical_form", "field_collection_note", "field_credit_line"];
+                          const idxA = orderedFields.indexOf(keyA);
+                          const idxB = orderedFields.indexOf(keyB);
+                          if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                          if (idxA !== -1) return -1;
+                          if (idxB !== -1) return 1;
+                          return 0;
+                        })
+                        .map(([key, val], i) => {
+                          const fieldLabels: Record<string, string> = {
+                            field_identifier: "Accession Number",
+                            field_collection_type: "Collection",
+                            field_extent: "Format/Dimensions",
+                            field_genre: "Object Name",
+                            field_description_long: "Description",
+                            field_linked_agent: "Creator",
+                            field_subject: "Subjects",
+                            field_place_published: "Place Published",
+                            field_edtf_date_created: "Date Created",
+                            decade_created: "Decade Created",
+                            field_credit_line: "Credit Line",
+                            field_physical_form: "Physical Form",
+                            field_collection_note: "Collection Note",
+                          };
+                          return (
+                            <div key={i} className="flex flex-col space-y-2 group">
+                              <span className="text-[10px] text-mca-cyan font-bold tracking-widest uppercase break-all">
+                                {fieldLabels[key] || key}
+                              </span>
+                              <span className="text-sm md:text-base text-slate-300 font-light leading-relaxed break-words whitespace-pre-wrap">
+                                {key === 'field_linked_agent' ? (
+                                  <span>
+                                    {String(val).split('|').map((agent: string, j: number) => (
+                                      <span key={j}>
+                                        <Link href={`/creator/${encodeURIComponent(agent.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                          {agent.trim()}
+                                        </Link>
+                                        {j < String(val).split('|').length - 1 ? ' | ' : ''}
+                                      </span>
+                                    ))}
+                                  </span>
+                                ) : key === 'field_subject' ? (
+                                  <span>
+                                    {String(val).split(';').map((subject: string, j: number) => (
+                                      <span key={j}>
+                                        <Link href={`/subject/${encodeURIComponent(subject.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                          {subject.trim()}
+                                        </Link>
+                                        {j < String(val).split(';').length - 1 ? '; ' : ''}
+                                      </span>
+                                    ))}
+                                  </span>
+                                ) : (
+                                  String(val)
+                                )}
+                              </span>
+                            </div>
+                          );
+                      })}
                     </div>
 
                     {relatedRecords.length > 0 && (
