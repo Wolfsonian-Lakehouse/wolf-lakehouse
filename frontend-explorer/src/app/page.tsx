@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useDuckDB } from "../hooks/useDuckDB";
+import { useCollection } from "../hooks/useCollection";
 
 export default function Home() {
   const { isReady, runQuery, error } = useDuckDB();
@@ -39,6 +40,10 @@ export default function Home() {
   const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
+
+  // Collection State
+  const { collection, isLoaded, addItem, removeItem, clearCollection, isInCollection, exportCsv } = useCollection();
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
 
   const executeNewSearch = () => {
     setPage(1);
@@ -225,7 +230,7 @@ export default function Home() {
     <div className="min-h-screen bg-mca-black text-white flex flex-col selection:bg-mca-yellow selection:text-mca-black antialiased font-mono">
       
       {/* Top Banner Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 border-b-2 border-white text-xs uppercase font-bold tracking-wider divide-y-2 md:divide-y-0 md:divide-x-2 divide-white bg-mca-black">
+      <div className="grid grid-cols-1 md:grid-cols-4 border-b-2 border-white text-xs uppercase font-bold tracking-wider divide-y-2 md:divide-y-0 md:divide-x-2 divide-white bg-mca-black">
         <div className="p-4 flex items-center justify-between">
           <span>ARCHIVE INDEX</span>
           <span className="text-mca-cyan">WOLFSONIAN-FIU</span>
@@ -243,6 +248,12 @@ export default function Home() {
           <span>RECORDS MOUNTED</span>
           <span className="text-white font-mono">
             {isReady ? Number(totalCount).toLocaleString() : '---'}
+          </span>
+        </div>
+        <div className="p-4 flex items-center justify-between group cursor-pointer bg-mca-dark hover:bg-mca-cyan transition-colors" onClick={() => setIsCollectionModalOpen(true)}>
+          <span className="group-hover:text-mca-black">SAVED COLLECTION</span>
+          <span className="text-mca-yellow group-hover:text-mca-black font-mono font-bold">
+            [{isLoaded ? collection.length : 0}]
           </span>
         </div>
       </div>
@@ -648,7 +659,17 @@ export default function Home() {
 
                     <div className="pt-4 border-t border-white/10 flex items-center justify-between text-[10px] font-bold">
                       <span className="text-mca-yellow">{item.field_genre || 'UNCATEGORIZED'}</span>
-                      <span className="text-slate-500 bg-mca-gray px-2 py-1">{item.source_system}</span>
+                      <div className="flex items-center space-x-2">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            isInCollection(item.field_identifier) ? removeItem(item.field_identifier) : addItem(item);
+                          }}
+                          className={`px-3 py-1.5 border transition-colors ${isInCollection(item.field_identifier) ? 'bg-mca-cyan border-mca-cyan text-mca-black' : 'border-white/20 text-slate-400 hover:text-white hover:border-white'}`}
+                        >
+                          {isInCollection(item.field_identifier) ? '[ - ] SAVED' : '[ + ] SAVE'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </article>
@@ -771,8 +792,16 @@ export default function Home() {
                 ) : selectedRecord ? (
                   <>
                     <header className="space-y-4 border-b-4 border-white pb-6">
-                      <div className="text-mca-cyan text-xs font-bold tracking-widest uppercase">
-                        // RECORD: {selectedRecord.field_identifier}
+                      <div className="flex justify-between items-start">
+                        <div className="text-mca-cyan text-xs font-bold tracking-widest uppercase">
+                          // RECORD: {selectedRecord.field_identifier}
+                        </div>
+                        <button 
+                          onClick={() => isInCollection(selectedRecord.field_identifier) ? removeItem(selectedRecord.field_identifier) : addItem(selectedRecord)}
+                          className={`text-xs px-4 py-2 uppercase font-bold tracking-widest border-2 transition-colors ${isInCollection(selectedRecord.field_identifier) ? 'bg-mca-cyan border-mca-cyan text-mca-black hover:bg-mca-black hover:text-mca-cyan' : 'bg-mca-black border-white text-white hover:bg-white hover:text-mca-black'}`}
+                        >
+                          {isInCollection(selectedRecord.field_identifier) ? '[-] REMOVE FROM COLLECTION' : '[+] ADD TO COLLECTION'}
+                        </button>
                       </div>
                       <h2 className="text-3xl md:text-5xl font-black font-display uppercase tracking-tight leading-tight">
                         {selectedRecord.title}
@@ -802,6 +831,96 @@ export default function Home() {
               </div>
             </div>
             
+          </div>
+        </div>
+      )}
+
+      {/* Full-Screen Brutalist Collection Drawer */}
+      {isCollectionModalOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-mca-black overflow-hidden font-mono text-white animate-in slide-in-from-right duration-300 border-l-4 border-mca-cyan">
+          
+          <header className="flex items-center justify-between p-6 md:p-10 border-b-2 border-white/20">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-black font-display uppercase tracking-tight leading-tight text-white">
+                SAVED <span className="text-mca-cyan">COLLECTION</span>
+              </h2>
+              <div className="text-slate-400 text-xs font-bold tracking-widest uppercase mt-2">
+                {collection.length} RECORDS SELECTED
+              </div>
+            </div>
+            <div className="flex space-x-4">
+              {collection.length > 0 && (
+                <>
+                  <button 
+                    onClick={exportCsv}
+                    className="bg-mca-yellow text-mca-black font-black uppercase tracking-widest px-6 py-3 border-2 border-mca-yellow hover:bg-transparent hover:text-mca-yellow transition-colors text-sm"
+                  >
+                    [⬇] EXPORT CSV
+                  </button>
+                  <button 
+                    onClick={clearCollection}
+                    className="bg-transparent text-red-500 font-black uppercase tracking-widest px-6 py-3 border-2 border-red-500 hover:bg-red-500 hover:text-white transition-colors text-sm"
+                  >
+                    [🗑] CLEAR
+                  </button>
+                </>
+              )}
+              <button 
+                onClick={() => setIsCollectionModalOpen(false)}
+                className="bg-white text-mca-black font-black uppercase tracking-widest px-6 py-3 border-2 border-white hover:bg-mca-cyan hover:border-mca-cyan transition-colors text-sm"
+              >
+                [X] CLOSE
+              </button>
+            </div>
+          </header>
+
+          <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-mca-dark/50">
+            {collection.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full space-y-6 text-slate-500">
+                <span className="text-5xl">📭</span>
+                <p className="text-sm font-bold tracking-widest uppercase">YOUR COLLECTION IS EMPTY</p>
+                <button 
+                  onClick={() => setIsCollectionModalOpen(false)}
+                  className="px-6 py-3 border border-white/20 hover:border-white text-white transition-colors text-xs font-bold tracking-widest uppercase"
+                >
+                  RETURN TO SEARCH
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {collection.map((item, idx) => (
+                  <article key={idx} className="bg-mca-black border border-white/20 p-4 flex flex-col space-y-4 group">
+                    <div className="h-40 bg-mca-dark relative flex items-center justify-center p-2 border border-white/10">
+                      <img 
+                        src={`/images/${(item.field_identifier || "").split(';')[0].trim()}.jpg`}
+                        alt={item.title}
+                        className="object-contain max-w-full max-h-full"
+                        onError={(e: any) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <div className="absolute hidden inset-0 flex flex-col items-center justify-center bg-mca-dark/95 text-slate-600 text-[10px] uppercase font-bold tracking-widest">
+                        <span>[ NO IMAGE ]</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <div className="text-[9px] text-mca-cyan font-bold mb-1 truncate">{item.field_identifier}</div>
+                        <h3 className="font-bold text-xs uppercase leading-snug line-clamp-2">{item.title}</h3>
+                      </div>
+                      <button 
+                        onClick={() => removeItem(item.field_identifier)}
+                        className="w-full py-2 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-[10px] font-bold tracking-widest uppercase"
+                      >
+                        [ - ] REMOVE
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
