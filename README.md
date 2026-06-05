@@ -87,13 +87,14 @@ The original purpose of the Lakehouse Frontend Explorer was to solve the institu
 * **Interactive Historical Timeline:** Allows users to dynamically slide and filter the entire catalog by decade or specific years in real-time.
 * **"Surprise Me" Algorithmic Engine:** A serendipitous visual discovery tool that serves users a random, highly visual subset of the collection to encourage organic exploration.
 * **"More Like This" Semantic Discovery:** When viewing a record, the engine instantly queries DuckDB for 4 randomized, related records that share the same Subject, Genre, or Creator, encouraging users to dive down the rabbit hole.
-* **Dynamic Creator Dossiers:** Automatically generates dedicated landing pages that aggregate and display all cataloged works by a specific artist, designer, or author.
+* **Dynamic Creator & Subject Dossiers:** Automatically generates dedicated landing pages that aggregate and display all cataloged works by a specific artist, designer, author, or subject. Clickable hyperlinks are integrated across the search grid and detailed modals for seamless navigation.
+* **Clean Metadata Modals:** Detail views automatically map internal database fields to user-friendly labels (e.g., Accession Number) and hide redundant system data to provide a pristine viewing experience.
 * **Infinite Scroll Grid:** A high-performance, Brutalist-themed masonry grid that can render thousands of images smoothly without crashing the browser.
 
 **Staff & Researcher Tools**
 * **Browser-Native Staff Collections:** Staff can curate custom lists of catalog records directly within their browser memory (`localStorage`), allowing them to build research sets without ever needing to log in or create an account.
 * **Shareable Collection Links:** Users can instantly generate a custom serverless URL containing their curated item IDs, allowing them to share curated galleries with colleagues with zero backend architecture. 
-* **CSV Export Engine:** With a single click, users can instantly export their curated collections into a formatted spreadsheet for exhibition planning, sharing, or downstream research.
+* **CSV Export Engine:** With a single click, users can instantly export their curated collections (including all 17 available data columns) into a formatted spreadsheet for exhibition planning, sharing, or downstream research.
 * **One-Click Image Downloads:** High-visibility download buttons integrated directly into the record modal, allowing staff to quickly save web-optimized JPEGs for their work.
 
 ---
