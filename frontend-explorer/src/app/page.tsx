@@ -240,24 +240,44 @@ export default function Home() {
         setSelectedRecord(data[0]);
         
         // Fetch More Like This
-        const escapedSubject = data[0].field_subject?.replace(/'/g, "''") || 'NO_MATCH_XYZ';
-        const escapedGenre = data[0].field_genre?.replace(/'/g, "''") || 'NO_MATCH_XYZ';
-        const escapedAgent = data[0].field_linked_agent?.replace(/'/g, "''") || 'NO_MATCH_XYZ';
+        let matchConditions = [];
+        if (data[0].field_subject) {
+          const mainSubject = data[0].field_subject.split(';')[0].trim().replace(/'/g, "''");
+          matchConditions.push(`field_subject LIKE '%${mainSubject}%'`);
+        }
+        if (data[0].field_genre) {
+          matchConditions.push(`field_genre = '${data[0].field_genre.replace(/'/g, "''")}'`);
+        }
+        if (data[0].field_linked_agent) {
+          matchConditions.push(`field_linked_agent = '${data[0].field_linked_agent.replace(/'/g, "''")}'`);
+        }
         
-        const relatedQuery = `
+        const matchSql = matchConditions.length > 0 ? `AND (${matchConditions.join(' OR ')})` : '';
+
+        let relatedQuery = `
           SELECT title, field_identifier, has_image 
           FROM catalog 
           WHERE field_identifier != '${identifier.replace(/'/g, "''")}' 
           AND has_image = true 
-          AND (
-            field_subject = '${escapedSubject}'
-            OR field_genre = '${escapedGenre}'
-            OR field_linked_agent = '${escapedAgent}'
-          )
+          ${matchSql}
           ORDER BY hash(field_identifier) ASC
           LIMIT 4
         `;
-        const relatedData = await runQuery(relatedQuery);
+        
+        let relatedData = await runQuery(relatedQuery);
+        
+        // Fallback: If no semantic matches, just show 4 random visual records
+        if (!relatedData || relatedData.length === 0) {
+          const fallbackQuery = `
+            SELECT title, field_identifier, has_image 
+            FROM catalog 
+            WHERE field_identifier != '${identifier.replace(/'/g, "''")}' 
+            AND has_image = true 
+            USING SAMPLE 4
+          `;
+          relatedData = await runQuery(fallbackQuery);
+        }
+        
         if (relatedData) {
           setRelatedRecords(relatedData);
         }
