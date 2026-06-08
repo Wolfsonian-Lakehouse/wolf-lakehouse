@@ -14,7 +14,8 @@ ENV MB_PLUGINS_DIR=/plugins
 EXPOSE 3000
 
 # Start Metabase
-CMD ["java", "-jar", "/metabase.jar"]
+# Use shell form to allow $JAVA_OPTS injection for memory limits
+CMD java $JAVA_OPTS -jar /metabase.jar
 
 
 
