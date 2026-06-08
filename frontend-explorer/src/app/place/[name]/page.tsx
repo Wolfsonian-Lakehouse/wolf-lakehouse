@@ -17,6 +17,7 @@ export default function CreatorPage({ params }: { params: Promise<{ name: string
   const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalLoading, setIsModalLoading] = useState(false);
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (isReady) {
@@ -306,27 +307,53 @@ export default function CreatorPage({ params }: { params: Promise<{ name: string
             </button>
           </div>
 
-          <div className="flex flex-col md:flex-row w-full h-full">
+          <div className="flex flex-col md:flex-row w-full h-full min-h-0">
             
             {/* Left side - Image */}
-            <div className="w-full md:w-1/2 bg-black border-b md:border-b-0 md:border-r border-white/20 relative flex items-center justify-center p-8">
+            <div className="w-full md:w-1/2 bg-black border-b md:border-b-0 md:border-r border-white/20 relative flex flex-col p-8 overflow-y-auto overflow-x-hidden h-[50vh] md:h-auto custom-scrollbar">
               {isModalLoading ? (
-                <div className="animate-spin h-16 w-16 border-4 border-white border-t-mca-cyan rounded-none" />
+                <div className="animate-spin h-16 w-16 border-4 border-white border-t-mca-cyan rounded-none mx-auto my-auto flex-shrink-0" />
               ) : selectedRecord ? (
-                <>
-                  <img 
-                    src={`/images/${(selectedRecord.field_identifier || "").split(';')[0].trim()}.jpg`}
-                    alt={selectedRecord.title}
-                    className="object-contain w-full h-full max-h-[80vh] drop-shadow-2xl z-10"
-                    onError={(e: any) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                  <div className="absolute hidden inset-0 flex flex-col items-center justify-center bg-mca-black text-slate-600 text-lg uppercase font-bold tracking-widest space-y-4">
-                    <span>[ NO IMAGE DATA FOUND ]</span>
-                  </div>
-                </>
+                (() => {
+                  const identifiers = (selectedRecord.field_identifier || "").split(';').map((i: string) => i.trim()).filter(Boolean);
+                  if (identifiers.length === 0) return (
+                    <div className="flex flex-col items-center justify-center text-slate-600 text-lg uppercase font-bold tracking-widest space-y-4 my-auto flex-shrink-0">
+                      <span>[ NO IMAGE DATA FOUND ]</span>
+                    </div>
+                  );
+
+                  return identifiers.map((id: string, idx: number) => {
+                    const imgSrc = `/images/${id}.jpg`;
+                    return (
+                      <div key={idx} className="relative w-full flex-shrink-0 flex flex-col items-center justify-center mb-16 last:mb-0 group/img min-h-[40vh] md:min-h-[70vh]">
+                        <img 
+                          src={imgSrc}
+                          alt={`${selectedRecord.title} - image ${idx + 1}`}
+                          className="object-contain w-full h-full drop-shadow-2xl z-10 cursor-zoom-in transition-transform duration-300 hover:scale-[1.02]"
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            setZoomedImage(imgSrc);
+                          }}
+                          onError={(e: any) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <div className="absolute hidden inset-0 flex flex-col items-center justify-center bg-mca-black text-slate-600 text-[10px] uppercase font-bold tracking-widest">
+                          <span>[ NO IMAGE ${idx + 1} FOUND ]</span>
+                        </div>
+                        <a 
+                          href={imgSrc}
+                          download={`${id}.jpg`}
+                          className="absolute bottom-0 md:bottom-4 right-0 md:right-4 bg-mca-yellow text-mca-black font-black uppercase tracking-widest px-4 py-3 border-2 border-mca-yellow hover:bg-mca-black hover:text-mca-yellow transition-colors text-[10px] opacity-0 group-hover/img:opacity-100 focus:opacity-100 z-20"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          [⬇] DOWNLOAD JPG {identifiers.length > 1 ? `(${idx + 1}/${identifiers.length})` : ''}
+                        </a>
+                      </div>
+                    );
+                  });
+                })()
               ) : null}
             </div>
 
@@ -428,6 +455,20 @@ export default function CreatorPage({ params }: { params: Promise<{ name: string
             </div>
             
           </div>
+        </div>
+      )}
+
+      {/* FULL SCREEN ZOOM MODAL */}
+      {zoomedImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center cursor-zoom-out p-4 md:p-12 backdrop-blur-sm"
+          onClick={() => setZoomedImage(null)}
+        >
+          <img 
+            src={zoomedImage}
+            alt="Zoomed full screen"
+            className="w-full h-full object-contain max-w-[95vw] max-h-[95vh] drop-shadow-[0_0_50px_rgba(255,255,255,0.1)]"
+          />
         </div>
       )}
 
