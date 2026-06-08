@@ -119,7 +119,7 @@ export default function Home() {
     }
     
     try {
-      let whereClause = `WHERE title IS NOT NULL`;
+      let whereClause = `WHERE 1=1`;
 
       let sharedIds: string[] = sharedCollectionIds;
       if (typeof window !== 'undefined' && sharedIds.length === 0 && !window.location.search.includes('collection_cleared')) {
@@ -703,7 +703,7 @@ export default function Home() {
                       </div>
                       
                       <h3 className="font-bold text-sm leading-tight text-white uppercase group-hover:text-mca-cyan transition-colors">
-                        {item.title}
+                        {item.title || item.field_identifier || '[UNTITLED OBJECT]'}
                       </h3>
                       
                       <p className="text-slate-400 text-xs leading-relaxed font-sans font-light line-clamp-4">
@@ -952,8 +952,8 @@ export default function Home() {
                           {isInCollection(selectedRecord.field_identifier) ? '[-] REMOVE FROM COLLECTION' : '[+] ADD TO COLLECTION'}
                         </button>
                       </div>
-                      <h2 className="text-3xl md:text-5xl font-black font-display uppercase tracking-tight leading-tight">
-                        {selectedRecord.title}
+                      <h2 className="text-3xl md:text-5xl font-black font-display uppercase tracking-tight leading-tight break-words">
+                        {selectedRecord.title || selectedRecord.field_identifier || '[UNTITLED OBJECT]'}
                       </h2>
                     </header>
 
@@ -1075,9 +1075,9 @@ export default function Home() {
                                 />
                               </div>
                               <div className="p-3 bg-mca-black border-t-2 border-white/20">
-                                <p className="text-[10px] uppercase font-bold tracking-widest text-slate-300 line-clamp-2">
-                                  {rel.title}
-                                </p>
+                                <h4 className="font-bold text-xs uppercase leading-snug line-clamp-2 group-hover:text-mca-cyan transition-colors">
+                                  {rel.title || rel.field_identifier || '[UNTITLED OBJECT]'}
+                                </h4>
                               </div>
                             </button>
                           ))}
@@ -1185,7 +1185,7 @@ export default function Home() {
                     <div className="flex-1 flex flex-col justify-between space-y-4">
                       <div>
                         <div className="text-[9px] text-mca-cyan font-bold mb-1 truncate">{item.field_identifier}</div>
-                        <h3 className="font-bold text-xs uppercase leading-snug line-clamp-2">{item.title}</h3>
+                        <h3 className="font-bold text-xs uppercase leading-snug line-clamp-2">{item.title || item.field_identifier || '[UNTITLED OBJECT]'}</h3>
                       </div>
                       <button 
                         onClick={() => removeItem(item.field_identifier)}

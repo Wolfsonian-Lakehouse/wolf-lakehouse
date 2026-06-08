@@ -191,7 +191,7 @@ export default function SubjectPage({ params }: { params: Promise<{ name: string
                       </div>
                       
                       <h3 className="font-bold text-sm leading-tight text-white uppercase group-hover:text-mca-cyan transition-colors">
-                        {item.title}
+                        {item.title || item.field_identifier || '[UNTITLED OBJECT]'}
                       </h3>
                       
                       <p className="text-slate-400 text-xs leading-relaxed font-sans font-light line-clamp-4">
@@ -375,8 +375,8 @@ export default function SubjectPage({ params }: { params: Promise<{ name: string
                       <div className="text-mca-cyan text-xs font-bold tracking-widest uppercase">
                         // RECORD: {selectedRecord.field_identifier}
                       </div>
-                      <h2 className="text-3xl md:text-5xl font-black font-display uppercase tracking-tight leading-tight">
-                        {selectedRecord.title}
+                      <h2 className="text-3xl md:text-5xl font-black font-display uppercase tracking-tight leading-tight break-words">
+                        {selectedRecord.title || selectedRecord.field_identifier || '[UNTITLED OBJECT]'}
                       </h2>
                     </header>
 
