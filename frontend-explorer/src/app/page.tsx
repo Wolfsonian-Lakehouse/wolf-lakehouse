@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useDuckDB } from "../hooks/useDuckDB";
 import { useCollection } from "../hooks/useCollection";
+import { parseDelimited } from "../utils/formatters";
 
 export default function Home() {
   const { isReady, runQuery, error } = useDuckDB();
@@ -714,12 +715,12 @@ export default function Home() {
                           <div className="flex space-x-2">
                             <span className="text-slate-600 w-20 shrink-0">CREATOR</span>
                             <span className="text-slate-300 truncate">
-                              {item.field_linked_agent.split('|').map((agent: string, i: number) => (
+                              {parseDelimited(item.field_linked_agent, '|').map((agent: any, i: number, arr: any[]) => (
                                 <span key={i}>
-                                  <Link href={`/creator/${encodeURIComponent(agent.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
-                                    {agent.trim()}
+                                  <Link href={`/creator/${encodeURIComponent(agent)}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                    {agent}
                                   </Link>
-                                  {i < item.field_linked_agent.split('|').length - 1 ? ' | ' : ''}
+                                  {i < arr.length - 1 ? ' | ' : ''}
                                 </span>
                               ))}
                             </span>
@@ -753,12 +754,12 @@ export default function Home() {
                           <div className="flex space-x-2">
                             <span className="text-slate-600 w-20 shrink-0">SUBJECT</span>
                             <span className="text-slate-300 truncate">
-                              {item.field_subject.split(';').map((subject: string, i: number) => (
+                              {parseDelimited(item.field_subject, item.field_subject.includes(';') ? ';' : '|').map((subject: string, i: number, arr: any[]) => (
                                 <span key={i}>
-                                  <Link href={`/subject/${encodeURIComponent(subject.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
-                                    {subject.trim()}
+                                  <Link href={`/subject/${encodeURIComponent(subject)}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                    {subject}
                                   </Link>
-                                  {i < item.field_subject.split(';').length - 1 ? '; ' : ''}
+                                  {i < arr.length - 1 ? '; ' : ''}
                                 </span>
                               ))}
                             </span>
@@ -992,56 +993,56 @@ export default function Home() {
                               <span className="text-sm md:text-base text-slate-300 font-light leading-relaxed break-words whitespace-pre-wrap">
                                 {key === 'field_linked_agent' ? (
                                   <span>
-                                    {String(val).split('|').map((agent: string, j: number) => (
+                                    {parseDelimited(val, '|').map((agent: any, j: number, arr: any[]) => (
                                       <span key={j}>
-                                        <Link href={`/creator/${encodeURIComponent(agent.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
-                                          {agent.trim()}
+                                        <Link href={`/creator/${encodeURIComponent(agent)}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                          {agent}
                                         </Link>
-                                        {j < String(val).split('|').length - 1 ? ' | ' : ''}
+                                        {j < arr.length - 1 ? ' | ' : ''}
                                       </span>
                                     ))}
                                   </span>
                                 ) : key === 'field_subject' ? (
                                   <span>
-                                    {String(val).split(';').map((subject: string, j: number) => (
+                                    {parseDelimited(String(val), String(val).includes(';') ? ';' : '|').map((subject: string, j: number, arr: any[]) => (
                                       <span key={j}>
-                                        <Link href={`/subject/${encodeURIComponent(subject.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
-                                          {subject.trim()}
+                                        <Link href={`/subject/${encodeURIComponent(subject)}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                          {subject}
                                         </Link>
-                                        {j < String(val).split(';').length - 1 ? '; ' : ''}
+                                        {j < arr.length - 1 ? '; ' : ''}
                                       </span>
                                     ))}
                                   </span>
                                 ) : key === 'field_genre' ? (
                                   <span>
-                                    {String(val).split('|').map((genre: string, j: number) => (
+                                    {parseDelimited(String(val), '|').map((genre: string, j: number, arr: any[]) => (
                                       <span key={j}>
-                                        <Link href={`/genre/${encodeURIComponent(genre.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
-                                          {genre.trim()}
+                                        <Link href={`/genre/${encodeURIComponent(genre)}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                          {genre}
                                         </Link>
-                                        {j < String(val).split('|').length - 1 ? ' | ' : ''}
+                                        {j < arr.length - 1 ? ' | ' : ''}
                                       </span>
                                     ))}
                                   </span>
                                 ) : key === 'field_place_published' ? (
                                   <span>
-                                    {String(val).split('|').map((place: string, j: number) => (
+                                    {parseDelimited(String(val), '|').map((place: string, j: number, arr: any[]) => (
                                       <span key={j}>
-                                        <Link href={`/place/${encodeURIComponent(place.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
-                                          {place.trim()}
+                                        <Link href={`/place/${encodeURIComponent(place)}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                          {place}
                                         </Link>
-                                        {j < String(val).split('|').length - 1 ? ' | ' : ''}
+                                        {j < arr.length - 1 ? ' | ' : ''}
                                       </span>
                                     ))}
                                   </span>
                                 ) : key === 'field_collection_type' ? (
                                   <span>
-                                    {String(val).split('|').map((col: string, j: number) => (
+                                    {parseDelimited(String(val), '|').map((col: string, j: number, arr: any[]) => (
                                       <span key={j}>
-                                        <Link href={`/collection/${encodeURIComponent(col.trim())}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
-                                          {col.trim()}
+                                        <Link href={`/collection/${encodeURIComponent(col)}`} className="hover:text-mca-yellow hover:underline" onClick={(e: any) => e.stopPropagation()}>
+                                          {col}
                                         </Link>
-                                        {j < String(val).split('|').length - 1 ? ' | ' : ''}
+                                        {j < arr.length - 1 ? ' | ' : ''}
                                       </span>
                                     ))}
                                   </span>
