@@ -1,4 +1,4 @@
-export function parseDelimited(value: string | null | undefined, delimiter: string = '|'): string[] {
+export function parseDelimited(value: any, delimiter: string = '|'): string[] {
   if (!value) return [];
   
   const parsed = String(value)

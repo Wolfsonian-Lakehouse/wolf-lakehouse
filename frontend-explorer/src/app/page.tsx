@@ -88,13 +88,16 @@ export default function Home() {
   const fetchFacets = async () => {
     if (!isReady || topCreators.length > 0) return; // Only fetch once
     try {
-      const creators = await runQuery(`SELECT trim(unnest(list_distinct(string_split(field_linked_agent, '|')))) as facet FROM catalog WHERE field_linked_agent IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`);
+      const creatorsQuery = `SELECT facet FROM (SELECT DISTINCT field_identifier, trim(raw_facet) as facet FROM (SELECT field_identifier, unnest(string_split(field_linked_agent, '|')) as raw_facet FROM catalog WHERE field_linked_agent IS NOT NULL)) WHERE facet != '' GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`;
+      const creators = await runQuery(creatorsQuery);
       if (creators) setTopCreators(creators.map((r: any) => r.facet).sort((a: string, b: string) => a.localeCompare(b)));
 
-      const subjects = await runQuery(`SELECT trim(unnest(list_distinct(string_split(field_subject, '|')))) as facet FROM catalog WHERE field_subject IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`);
+      const subjectsQuery = `SELECT facet FROM (SELECT DISTINCT field_identifier, trim(raw_facet) as facet FROM (SELECT field_identifier, unnest(string_split(field_subject, '|')) as raw_facet FROM catalog WHERE field_subject IS NOT NULL)) WHERE facet != '' GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`;
+      const subjects = await runQuery(subjectsQuery);
       if (subjects) setTopSubjects(subjects.map((r: any) => r.facet).sort((a: string, b: string) => a.localeCompare(b)));
 
-      const places = await runQuery(`SELECT trim(unnest(list_distinct(string_split(field_place_published, '|')))) as facet FROM catalog WHERE field_place_published IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`);
+      const placesQuery = `SELECT facet FROM (SELECT DISTINCT field_identifier, trim(raw_facet) as facet FROM (SELECT field_identifier, unnest(string_split(field_place_published, '|')) as raw_facet FROM catalog WHERE field_place_published IS NOT NULL)) WHERE facet != '' GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`;
+      const places = await runQuery(placesQuery);
       if (places) setTopPlaces(places.map((r: any) => r.facet).sort((a: string, b: string) => a.localeCompare(b)));
 
       const timeline = await runQuery(`SELECT decade_created as decade, count(*) as count FROM catalog WHERE decade_created IS NOT NULL GROUP BY 1 ORDER BY 1`);
