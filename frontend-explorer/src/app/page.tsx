@@ -730,8 +730,8 @@ export default function Home() {
                           </div>
                         )}
                         {item.field_edtf_date_created && (
-                          <div className="flex items-center text-xs text-slate-400 gap-1.5 mt-0.5">
-                            <Clock className="w-3.5 h-3.5" />
+                          <div className="flex space-x-2">
+                            <span className="text-slate-600 w-20 shrink-0">DATE</span>
                             <span className="text-slate-300 truncate">{formatEDTFDate(item.field_edtf_date_created)}</span>
                           </div>
                         )}
