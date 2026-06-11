@@ -88,13 +88,13 @@ export default function Home() {
   const fetchFacets = async () => {
     if (!isReady || topCreators.length > 0) return; // Only fetch once
     try {
-      const creators = await runQuery(`SELECT field_linked_agent as facet FROM catalog WHERE field_linked_agent IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 50`);
+      const creators = await runQuery(`SELECT trim(unnest(list_distinct(string_split(field_linked_agent, '|')))) as facet FROM catalog WHERE field_linked_agent IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`);
       if (creators) setTopCreators(creators.map((r: any) => r.facet).sort((a: string, b: string) => a.localeCompare(b)));
 
-      const subjects = await runQuery(`SELECT field_subject as facet FROM catalog WHERE field_subject IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 50`);
+      const subjects = await runQuery(`SELECT trim(unnest(list_distinct(string_split(field_subject, '|')))) as facet FROM catalog WHERE field_subject IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`);
       if (subjects) setTopSubjects(subjects.map((r: any) => r.facet).sort((a: string, b: string) => a.localeCompare(b)));
 
-      const places = await runQuery(`SELECT field_place_published as facet FROM catalog WHERE field_place_published IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 50`);
+      const places = await runQuery(`SELECT trim(unnest(list_distinct(string_split(field_place_published, '|')))) as facet FROM catalog WHERE field_place_published IS NOT NULL GROUP BY 1 ORDER BY count(*) DESC LIMIT 500`);
       if (places) setTopPlaces(places.map((r: any) => r.facet).sort((a: string, b: string) => a.localeCompare(b)));
 
       const timeline = await runQuery(`SELECT decade_created as decade, count(*) as count FROM catalog WHERE decade_created IS NOT NULL GROUP BY 1 ORDER BY 1`);
@@ -174,11 +174,11 @@ export default function Home() {
         }
       }
       if (selectedSystem !== "ALL") whereClause += ` AND source_system = '${selectedSystem}'`;
-      if (selectedGenre !== "ALL") whereClause += ` AND field_genre = '${selectedGenre}'`;
+      if (selectedGenre !== "ALL") whereClause += ` AND field_genre LIKE '%${selectedGenre.replace(/'/g, "''")}%'`;
       if (hasImageOnly) whereClause += ` AND has_image = true`;
-      if (selectedCreator !== "ALL") whereClause += ` AND field_linked_agent = '${selectedCreator.replace(/'/g, "''")}'`;
-      if (selectedSubject !== "ALL") whereClause += ` AND field_subject = '${selectedSubject.replace(/'/g, "''")}'`;
-      if (selectedPlace !== "ALL") whereClause += ` AND field_place_published = '${selectedPlace.replace(/'/g, "''")}'`;
+      if (selectedCreator !== "ALL") whereClause += ` AND field_linked_agent LIKE '%${selectedCreator.replace(/'/g, "''")}%'`;
+      if (selectedSubject !== "ALL") whereClause += ` AND field_subject LIKE '%${selectedSubject.replace(/'/g, "''")}%'`;
+      if (selectedPlace !== "ALL") whereClause += ` AND field_place_published LIKE '%${selectedPlace.replace(/'/g, "''")}%'`;
       if (selectedDecade !== "ALL") whereClause += ` AND decade_created = ${selectedDecade}`;
       if (minYear && !isNaN(parseInt(minYear))) whereClause += ` AND year_created >= ${parseInt(minYear)}`;
       if (maxYear && !isNaN(parseInt(maxYear))) whereClause += ` AND year_created <= ${parseInt(maxYear)}`;
@@ -1167,7 +1167,13 @@ export default function Home() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {collection.map((item, idx) => (
                   <article key={idx} className="bg-mca-black border border-white/20 p-4 flex flex-col space-y-4 group">
-                    <div className="h-40 bg-mca-dark relative flex items-center justify-center p-2 border border-white/10">
+                    <div 
+                      className="h-40 bg-mca-dark relative flex items-center justify-center p-2 border border-white/10 cursor-pointer hover:border-mca-cyan transition-colors"
+                      onClick={() => {
+                        setIsCollectionModalOpen(false);
+                        handleRecordClick(item.field_identifier);
+                      }}
+                    >
                       <img 
                         src={`/images/${encodeURIComponent((item.field_identifier || "").split(';')[0].trim().replace(/[^a-zA-Z0-9.-]/g, '_'))}.jpg`}
                         alt={item.title}
@@ -1183,9 +1189,15 @@ export default function Home() {
                     </div>
                     
                     <div className="flex-1 flex flex-col justify-between space-y-4">
-                      <div>
+                      <div 
+                        className="cursor-pointer group/title"
+                        onClick={() => {
+                          setIsCollectionModalOpen(false);
+                          handleRecordClick(item.field_identifier);
+                        }}
+                      >
                         <div className="text-[9px] text-mca-cyan font-bold mb-1 truncate">{item.field_identifier}</div>
-                        <h3 className="font-bold text-xs uppercase leading-snug line-clamp-2">{item.title || item.field_identifier || '[UNTITLED OBJECT]'}</h3>
+                        <h3 className="font-bold text-xs uppercase leading-snug line-clamp-2 group-hover/title:text-mca-cyan transition-colors">{item.title || item.field_identifier || '[UNTITLED OBJECT]'}</h3>
                       </div>
                       <button 
                         onClick={() => removeItem(item.field_identifier)}
