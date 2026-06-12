@@ -948,6 +948,13 @@ export default function Home() {
                         >
                           [⬇] DOWNLOAD JPG {identifiers.length > 1 ? `(${idx + 1}/${identifiers.length})` : ''}
                         </a>
+                        <Link 
+                          href={`/merch/${encodeURIComponent(selectedRecord.field_identifier)}`}
+                          className="absolute bottom-0 md:bottom-4 left-0 md:left-4 bg-white text-mca-black font-black uppercase tracking-widest px-4 py-3 border-2 border-white hover:bg-mca-black hover:text-white transition-colors text-[10px] z-20"
+                          onClick={(e: any) => e.stopPropagation()}
+                        >
+                          [👕] VIEW ON MERCH
+                        </Link>
                       </div>
                     );
                   });
