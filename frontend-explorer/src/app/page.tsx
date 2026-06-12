@@ -163,9 +163,9 @@ export default function Home() {
             }
           }
         } else {
-          const terms = searchTerm.split(',').map(t => t.trim()).filter(t => t.length > 0);
+          const terms = searchTerm.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
           if (terms.length > 0) {
-            const termConditions = terms.map(term => {
+            const termConditions = terms.map((term: string) => {
               const escapedSearch = term.replace(/'/g, "''").toLowerCase();
               return `(lower(title) LIKE '%${escapedSearch}%' OR lower(field_description_long) LIKE '%${escapedSearch}%' OR lower(field_identifier) LIKE '%${escapedSearch}%')`;
             });
@@ -190,11 +190,34 @@ export default function Home() {
       const limit = 48;
       const offset = (targetPage - 1) * limit;
 
+      let orderByClause = `ORDER BY has_image DESC, field_identifier ASC`;
+      if (searchTerm) {
+          const termsToScore = /\\b(AND|OR|NOT)\\b/.test(searchTerm) 
+              ? (searchTerm.match(/(".*?"|\\bAND\\b|\\bOR\\b|\\bNOT\\b|\\S+)/g) || []).filter((t: string) => !/\\b(AND|OR|NOT)\\b/i.test(t))
+              : searchTerm.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
+              
+          if (termsToScore.length > 0) {
+              const exactMatchScore = termsToScore.map((term: string) => {
+                  const escapedTerm = term.replace(/(^"|"$)/g, '').replace(/'/g, "''").toLowerCase();
+                  return `(CASE 
+                      WHEN lower(field_identifier) = '${escapedTerm}' THEN 3 
+                      WHEN lower(field_identifier) LIKE '${escapedTerm};%' THEN 2 
+                      WHEN lower(field_identifier) LIKE '%; ${escapedTerm};%' THEN 2 
+                      WHEN lower(field_identifier) LIKE '%; ${escapedTerm}' THEN 2 
+                      WHEN lower(field_identifier) LIKE '%;${escapedTerm};%' THEN 2 
+                      WHEN lower(field_identifier) LIKE '%;${escapedTerm}' THEN 2 
+                      ELSE 0 
+                  END)`;
+              }).join(' + ');
+              orderByClause = `ORDER BY (${exactMatchScore}) DESC, has_image DESC, field_identifier ASC`;
+          }
+      }
+
       const dataQuery = `
         SELECT title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, source_system, has_image, field_linked_agent, field_subject, field_place_published, field_edtf_date_created
         FROM catalog 
         ${whereClause}
-        ORDER BY has_image DESC, field_identifier ASC LIMIT ${limit} OFFSET ${offset}
+        ${orderByClause} LIMIT ${limit} OFFSET ${offset}
       `;
 
       const countQuery = `SELECT count(*) as total FROM catalog ${whereClause}`;
@@ -412,6 +435,9 @@ export default function Home() {
               </span>
               <span className="text-[10px] text-mca-yellow uppercase font-bold tracking-widest pl-2">
                 * Advanced: Use AND, OR, NOT for complex queries (e.g., France AND Medal)
+              </span>
+              <span className="text-[10px] text-slate-300 uppercase font-bold tracking-widest pl-2">
+                * Exact accession numbers or field identifiers will be prioritized at the top of results
               </span>
             </div>
             
