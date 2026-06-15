@@ -26,26 +26,19 @@ export default function Chatbot() {
   const sendMessage = async () => {
     if (!input.trim() || !isReady || isGenerating) return;
     
-    const userMsg = input.trim();
+    const userMsgText = input.trim();
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setMessages(prev => [...prev, { role: 'user', content: userMsgText }]);
     setIsGenerating(true);
     
     try {
-      // Basic stop word filtering
+      // 1. DUCKDB CONTEXT INJECTION
       const stopWords = ['a', 'an', 'the', 'in', 'on', 'at', 'to', 'for', 'with', 'about', 'show', 'me', 'find', 'search', 'what', 'is', 'are', 'do', 'does'];
-      const keywords = userMsg.toLowerCase().split(/\s+/).filter(w => w.length > 2 && !stopWords.includes(w));
+      const keywords = userMsgText.toLowerCase().split(/\s+/).filter(w => w.length > 2 && !stopWords.includes(w));
       
-      let reply = '';
-      
-      if (keywords.length === 0) {
-        reply = 'PLEASE PROVIDE MORE SPECIFIC KEYWORDS TO SEARCH THE CATALOG.';
-      } else {
-        // Construct a dynamic query
-        // Escape single quotes in keywords
+      let dbContext = '';
+      if (keywords.length > 0) {
         const safeKeywords = keywords.map(k => k.replace(/'/g, "''"));
-        
-        // Build WHERE clause
         const conditions = safeKeywords.map(k => `(
           title ILIKE '%${k}%' OR 
           field_subject ILIKE '%${k}%' OR 
@@ -55,32 +48,62 @@ export default function Chatbot() {
         )`).join(' AND ');
 
         const query = `
-          SELECT title, field_identifier, field_collection_type, field_subject
+          SELECT title, field_identifier, field_collection_type, field_subject, field_description_long
           FROM catalog 
           WHERE ${conditions}
           LIMIT 5;
         `;
         
         const results = await runQuery(query);
-        
-        if (!results || results.length === 0) {
-          reply = `NO MATCHES FOUND FOR: ${keywords.join(', ').toUpperCase()}`;
-        } else {
-          reply = `FOUND ${results.length} MATCH${results.length === 1 ? '' : 'ES'} FOR: ${keywords.join(', ').toUpperCase()}\n\n`;
+        if (results && results.length > 0) {
+          dbContext = "\n\n[SYSTEM CONTEXT: I searched the local catalog and found these matching items:\n";
           results.forEach((r: any, i: number) => {
-            reply += `[${i + 1}] ${r.title}\nID: ${r.field_identifier}\n`;
-            if (r.field_subject) reply += `SUBJECTS: ${r.field_subject}\n`;
-            reply += '\n';
+            dbContext += `${i+1}. Title: ${r.title}\nID: ${r.field_identifier}\nDescription: ${r.field_description_long || 'N/A'}\nSubject: ${r.field_subject || 'N/A'}\n\n`;
           });
-          reply += 'VIEW THESE ITEMS IN THE MAIN EXPLORER FOR MORE DETAILS.';
+          dbContext += "Please use this data to answer the user's question.]";
         }
       }
+
+      // Build the message payload
+      const apiMessages = [
+        ...messages,
+        { role: 'user', content: userMsgText + dbContext }
+      ];
+
+      // 2. CALL GEMINI API
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: apiMessages }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+
+      // Read the stream
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let reply = '';
       
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-      
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          reply += chunk;
+          setMessages(prev => {
+            const newMsgs = [...prev];
+            newMsgs[newMsgs.length - 1].content = reply;
+            return newMsgs;
+          });
+        }
+      }
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { role: 'assistant', content: 'ERROR GENERATING RESPONSE. DATABASE MIGHT STILL BE LOADING.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'ERROR GENERATING RESPONSE. DID YOU CONFIGURE GEMINI_API_KEY?' }]);
     } finally {
       setIsGenerating(false);
     }
