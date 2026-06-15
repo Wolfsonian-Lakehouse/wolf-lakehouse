@@ -109,6 +109,33 @@ export default function Chatbot() {
     }
   };
 
+  const renderMessageContent = (content: string) => {
+    const parts = [];
+    const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = regex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex, match.index)}</span>);
+      }
+      parts.push(
+        <a 
+          key={`link-${match.index}`} 
+          href={match[2]} 
+          className="text-mca-cyan underline hover:text-white transition-colors font-bold tracking-wider"
+        >
+          {match[1]}
+        </a>
+      );
+      lastIndex = regex.lastIndex;
+    }
+    if (lastIndex < content.length) {
+      parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex)}</span>);
+    }
+    return parts.length > 0 ? parts : content;
+  };
+
   return (
     <>
       {/* Toggle Button */}
@@ -138,7 +165,13 @@ export default function Chatbot() {
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`p-3 max-w-[85%] border-2 whitespace-pre-wrap ${msg.role === 'user' ? 'bg-white text-mca-black border-white' : 'bg-transparent text-mca-cyan border-mca-cyan'}`}>
-                  {msg.content}
+                  {msg.role === 'assistant' ? (
+                    <div className="text-gray-100 whitespace-pre-wrap">
+                      {renderMessageContent(msg.content)}
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             ))}
