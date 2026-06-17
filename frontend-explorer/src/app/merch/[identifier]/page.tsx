@@ -28,7 +28,8 @@ export default function MerchMockupPage({ params }: { params: Promise<{ identifi
     if (!isReady) return;
     setLoading(true);
     try {
-      const query = `SELECT * FROM catalog WHERE field_identifier LIKE '%${identifier.replace(/'/g, "''")}%' LIMIT 1`;
+      const idEscaped = identifier.replace(/'/g, "''");
+      const query = `SELECT * FROM catalog WHERE field_identifier = '${idEscaped}' OR field_identifier LIKE '${idEscaped};%' OR field_identifier LIKE '%; ${idEscaped};%' OR field_identifier LIKE '%; ${idEscaped}' LIMIT 1`;
       const data = await runQuery(query);
       if (data && data.length > 0) {
         setRecord(data[0]);

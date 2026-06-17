@@ -66,7 +66,8 @@ export default function SubjectPage({ params }: { params: Promise<{ name: string
     setIsModalLoading(true);
     setSelectedRecord(null);
     try {
-      const query = `SELECT * FROM catalog WHERE field_identifier LIKE '%${identifier.replace(/'/g, "''")}%' LIMIT 1`;
+      const idEscaped = identifier.replace(/'/g, "''");
+      const query = `SELECT * FROM catalog WHERE field_identifier = '${idEscaped}' OR field_identifier LIKE '${idEscaped};%' OR field_identifier LIKE '%; ${idEscaped};%' OR field_identifier LIKE '%; ${idEscaped}' LIMIT 1`;
       const data = await runQuery(query);
       if (data && data.length > 0) {
         setSelectedRecord(data[0]);

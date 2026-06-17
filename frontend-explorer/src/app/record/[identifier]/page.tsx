@@ -29,7 +29,8 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
     if (!isReady) return;
     setLoading(true);
     try {
-      const query = `SELECT * FROM catalog WHERE field_identifier LIKE '%${identifier.replace(/'/g, "''")}%' LIMIT 1`;
+      const idEscaped = identifier.replace(/'/g, "''");
+      const query = `SELECT * FROM catalog WHERE field_identifier = '${idEscaped}' OR field_identifier LIKE '${idEscaped};%' OR field_identifier LIKE '%; ${idEscaped};%' OR field_identifier LIKE '%; ${idEscaped}' LIMIT 1`;
       const data = await runQuery(query);
       if (data && data.length > 0) {
         setSelectedRecord(data[0]);
@@ -52,7 +53,7 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
         let relatedQuery = `
           SELECT title, field_identifier, has_image 
           FROM catalog 
-          WHERE field_identifier NOT LIKE '%${identifier.replace(/'/g, "''")}%' 
+          WHERE field_identifier != '${idEscaped}' AND field_identifier NOT LIKE '${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped}' 
           AND has_image = true 
           ${matchSql}
           ORDER BY field_identifier ASC
@@ -66,7 +67,7 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
           const fallbackQuery = `
             SELECT title, field_identifier, has_image 
             FROM catalog 
-            WHERE field_identifier NOT LIKE '%${identifier.replace(/'/g, "''")}%' 
+            WHERE field_identifier != '${idEscaped}' AND field_identifier NOT LIKE '${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped}' 
             AND has_image = true 
             USING SAMPLE 4
           `;
