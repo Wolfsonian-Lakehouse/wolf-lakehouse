@@ -163,7 +163,7 @@ def lakehouse_flow():
     alma_csv = export_alma.submit(wait_for=[alma_silver])
     
     # 6. Serving Layer Phase (DuckDB)
-    duckdb_fut = build_duckdb.submit(wait_for=[proficio_csv, alma_csv, normalized_catalog, history_metrics])
+    duckdb_fut = build_duckdb.submit(wait_for=[proficio_csv, alma_csv, normalized_catalog, history_metrics, comparison_alma, image_audit])
     
     # 6.5. Process NFS Images (Net New Only)
     images_fut = process_images_task.submit(wait_for=[normalized_catalog])
