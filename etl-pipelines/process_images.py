@@ -61,10 +61,6 @@ def process_single_row(row):
         import re
         dest_filename = f"{re.sub(r'[^a-zA-Z0-9.-]', '_', part)}.jpg"
         dest_path = OUTPUT_DIR / dest_filename
-        
-        if dest_filename in existing_dest_images:
-            already_exists.append(dest_filename)
-            continue
             
         found = False
         norm_candidate = normalize_name(part)
@@ -77,9 +73,15 @@ def process_single_row(row):
                 real_folder_name = existing_folders[subdir][norm_candidate]
                 obj_dir = DIGITAL_IMAGES_DIR / subdir / real_folder_name
                 if obj_dir.is_dir():
-                    image_files = []
-                    for ext in ['*.tif', '*.tiff', '*.jpg', '*.jpeg', '*.png', '*.TIF', '*.TIFF', '*.JPG', '*.JPEG', '*.PNG']:
-                        image_files.extend(obj_dir.glob(f"**/{ext}"))
+                    valid_exts = {'.tif', '.tiff', '.jpg', '.jpeg', '.png'}
+                    try:
+                        # Do ONE fast network call to list the directory, rather than 10 recursive globs!
+                        image_files = [
+                            f for f in obj_dir.iterdir() 
+                            if f.is_file() and f.suffix.lower() in valid_exts
+                        ]
+                    except Exception as e:
+                        image_files = []
                               
                     image_files = [f for f in image_files if not f.name.startswith('.')]
                     
@@ -202,6 +204,10 @@ if __name__ == "__main__":
 
     # 3. Update the catalog with image counts
     print("Updating catalog with image counts...")
+    
+    # Refresh the set so it sees all the newly downloaded variants!
+    final_existing_images = {f.name for f in OUTPUT_DIR.glob('*.jpg')}
+    
     def check_image_count(identifier):
         if pd.isna(identifier) or not identifier:
             return 0
@@ -210,9 +216,9 @@ if __name__ == "__main__":
         for part in id_parts:
             if len(part) <= 200:
                 base = f"{re.sub(r'[^a-zA-Z0-9.-]', '_', part)}"
-                if f"{base}.jpg" in existing_dest_images:
+                if f"{base}.jpg" in final_existing_images:
                     count = 1
-                    while f"{base}_{count}.jpg" in existing_dest_images:
+                    while f"{base}_{count}.jpg" in final_existing_images:
                         count += 1
                     return count
         return 0
