@@ -76,6 +76,97 @@ In addition to the data pipeline, the project features a powerful **Frontend Exp
 * **Robust Workflow Orchestration:** Uses Prefect to manage the ETL pipeline. The monolithic scripts have been completely decoupled into a 17-node Directed Acyclic Graph (DAG), providing an incredibly granular UI dashboard for monitoring, task-level asynchronous execution, and real-time metric summaries at the end of every flow.
 * **Automated Uptime & Error Alerting:** A dedicated Uptime Kuma container continuously tracks the health of all web and orchestration endpoints. Alongside this, a custom local Python microservice continuously tails the Docker logs, instantly dispatching SMTP email alerts to the team if any container throws a critical error or exception.
 
+---
+
+## 🔀 Pipeline DAG (Directed Acyclic Graph)
+
+The entire Lakehouse architecture is fully orchestrated via Prefect. Here is the automated dependency graph that executes on every run:
+
+```mermaid
+graph TD
+    subgraph 1. Extraction Phase
+        PR[Extract Proficio Raw]
+        IR[Extract Islandora Raw]
+        AR[Extract Alma Raw]
+    end
+
+    subgraph 2. Silver Phase
+        PS[Transform Proficio Silver]
+        AS[Transform Alma Silver]
+        
+        PR --> PS
+        AR --> AS
+    end
+    
+    subgraph 3. Validation Phase
+        QA[Isolate QA Failures]
+        PS --> QA
+    end
+
+    subgraph 4. Gold Generation Phase
+        UC[Generate Unified Catalog]
+        NC[Normalize Gold Catalog]
+        MO[Generate Missing Objects]
+        DR[Generate Duplicates Report]
+        CP[Generate Comparison Proficio]
+        CA[Generate Comparison Alma]
+        IA[Generate Image Audit]
+        SM[Snapshot Dashboard Metrics]
+        
+        PS --> UC
+        AS --> UC
+        UC --> NC
+        
+        QA --> MO
+        IR --> MO
+        UC --> MO
+        
+        PS --> DR
+        AS --> DR
+        
+        PS --> CP
+        IR --> CP
+        
+        AS --> CA
+        IR --> CA
+        
+        NC --> IA
+        
+        AS --> SM
+        IR --> SM
+        NC --> SM
+    end
+
+    subgraph 5. Export Phase
+        EP[Export Proficio to Workbench]
+        EA[Export Alma to Workbench]
+        
+        MO --> EP
+        AS --> EA
+    end
+
+    subgraph 6. Serving & Image Layer
+        DB[Build DuckDB Metabase Views]
+        PI[Process NFS Images]
+        
+        EP --> DB
+        EA --> DB
+        NC --> DB
+        SM --> DB
+        CA --> DB
+        IA --> DB
+        
+        NC --> PI
+    end
+
+    subgraph 7. Monitoring
+        RM[Report Pipeline Metrics]
+        
+        DB --> RM
+        PI --> RM
+    end
+```
+
 ## 🔍 The Frontend Explorer
 
 The original purpose of the Lakehouse Frontend Explorer was to solve the institution's most critical data silo problem: bridging the gap between the library’s Alma system and the museum’s Proficio system. Instead of forcing researchers and staff to use two separate, slow, and outdated legacy platforms, the Explorer unifies all 115,000+ records into a single, lightning-fast public entry point. By leveraging serverless browser technology (DuckDB WebAssembly), it entirely bypasses the need for expensive third-party vendors and backend servers, delivering instantaneous search and visual discovery at zero ongoing computing cost.
