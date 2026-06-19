@@ -88,6 +88,18 @@ def process_single_row(row):
                     if image_files:
                         for i, best_file in enumerate(sorted(image_files)):
                             try:
+                                base_name = re.sub(r'[^a-zA-Z0-9.-]', '_', part)
+                                if i == 0:
+                                    dest_filename = f"{base_name}.jpg"
+                                else:
+                                    dest_filename = f"{base_name}_{i}.jpg"
+                                    
+                                dest_path = OUTPUT_DIR / dest_filename
+                                
+                                if dest_filename in existing_dest_images:
+                                    already_exists.append(dest_filename)
+                                    continue
+
                                 with Image.open(best_file) as img:
                                     img = ImageOps.exif_transpose(img)
                                     rgb_img = img.convert('RGB')
@@ -99,19 +111,8 @@ def process_single_row(row):
                                             resample_method = Image.ANTIALIAS
                                         rgb_img.thumbnail((max_size, max_size), resample_method)
                                         
-                                    base_name = re.sub(r'[^a-zA-Z0-9.-]', '_', part)
-                                    if i == 0:
-                                        dest_filename = f"{base_name}.jpg"
-                                    else:
-                                        dest_filename = f"{base_name}_{i}.jpg"
-                                        
-                                    dest_path = OUTPUT_DIR / dest_filename
-                                    
-                                    if dest_filename not in existing_dest_images:
-                                        rgb_img.save(dest_path, 'JPEG', quality=80)
-                                        newly_copied.append(dest_filename)
-                                    else:
-                                        already_exists.append(dest_filename)
+                                    rgb_img.save(dest_path, 'JPEG', quality=80)
+                                    newly_copied.append(dest_filename)
                                         
                             except Exception as e:
                                 errors.append(f"{best_file.name}: {e}")
