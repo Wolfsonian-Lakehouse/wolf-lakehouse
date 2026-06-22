@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useDuckDB } from '../hooks/useDuckDB';
+import { useDuckDB } from '@/providers/DuckDBProvider';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);

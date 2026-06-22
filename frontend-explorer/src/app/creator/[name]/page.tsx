@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { useDuckDB } from "../../../hooks/useDuckDB";
+import { useDuckDB } from "@/providers/DuckDBProvider";
 import { formatEDTFDate } from "../../../utils/formatters";
 
 

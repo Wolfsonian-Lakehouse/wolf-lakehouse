@@ -1,21 +1,31 @@
-import { useState, useEffect } from 'react';
+"use client";
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as duckdb from '@duckdb/duckdb-wasm';
 
-export function useDuckDB() {
+interface DuckDBContextValue {
+  isReady: boolean;
+  error: string | null;
+  runQuery: (query: string) => Promise<any[] | null>;
+}
+
+const DuckDBContext = createContext<DuckDBContextValue | null>(null);
+
+export function DuckDBProvider({ children }: { children: ReactNode }) {
   const [db, setDb] = useState<duckdb.AsyncDuckDB | null>(null);
   const [conn, setConn] = useState<duckdb.AsyncDuckDBConnection | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let activeDb: duckdb.AsyncDuckDB | null = null;
+    let activeConn: duckdb.AsyncDuckDBConnection | null = null;
+
     async function init() {
       try {
-        // 1. Select the correct bundle for the browser from JSDelivr CDN
-        // This completely avoids any Next.js Webpack worker configuration issues!
         const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
         const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
         
-        // Create a Blob URL that imports the CDN worker script (avoids cross-origin worker creation restrictions)
         const workerUrl = URL.createObjectURL(
           new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' })
         );
@@ -23,18 +33,18 @@ export function useDuckDB() {
         
         const logger = new duckdb.ConsoleLogger();
         const newDb = new duckdb.AsyncDuckDB(logger, worker);
+        activeDb = newDb;
         
         await newDb.instantiate(bundle.mainModule, bundle.pthreadWorker);
         URL.revokeObjectURL(workerUrl);
         
         const newConn = await newDb.connect();
+        activeConn = newConn;
         
-        // 2. Register the parquet file from the public directory
-        // Since it's mounted via Docker to /public/data/, the browser can access it at /data/
         try {
           const absoluteUrl = `${window.location.origin}/data/unified_catalog_normalized.parquet?v=2`;
           await newDb.registerFileURL('normalized_catalog.parquet', absoluteUrl, duckdb.DuckDBDataProtocol.HTTP, false);
-          // Create a view so we can query it like a normal table, selecting only the columns of interest
+          
           await newConn.query(`
             CREATE VIEW catalog AS 
             SELECT 
@@ -63,13 +73,13 @@ export function useDuckDB() {
               ORDER BY CASE WHEN source_system = 'Proficio' THEN 1 ELSE 2 END
             ) = 1;
           `);
-          console.log("DuckDB initialized and Parquet file mounted!");
+          console.log("DuckDB Context initialized and Parquet file mounted!");
           
           setDb(newDb);
           setConn(newConn);
           setIsReady(true);
         } catch (e: any) {
-          console.error("Failed to mount parquet file. It might not exist in the public directory yet.", e);
+          console.error("Failed to mount parquet file.", e);
           setError(`Failed to mount parquet file: ${e?.message || e}`);
         }
       } catch (err: any) {
@@ -81,17 +91,15 @@ export function useDuckDB() {
     init();
 
     return () => {
-      conn?.close();
-      db?.terminate();
+      activeConn?.close();
+      activeDb?.terminate();
     };
   }, []);
 
-  // Helper function to run queries
   const runQuery = async (query: string) => {
     if (!conn) return null;
     try {
       const arrowResult: any = await conn.query(query);
-      // Convert Arrow table to standard JSON array
       return arrowResult.toArray().map((row: any) => row.toJSON());
     } catch (e: any) {
       console.error("Query Failed:", e);
@@ -100,5 +108,17 @@ export function useDuckDB() {
     }
   };
 
-  return { isReady, runQuery, error };
+  return (
+    <DuckDBContext.Provider value={{ isReady, error, runQuery }}>
+      {children}
+    </DuckDBContext.Provider>
+  );
+}
+
+export function useDuckDB() {
+  const context = useContext(DuckDBContext);
+  if (!context) {
+    throw new Error("useDuckDB must be used within a DuckDBProvider");
+  }
+  return context;
 }

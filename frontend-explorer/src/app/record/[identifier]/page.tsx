@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDuckDB } from "../../../hooks/useDuckDB";
+import { useDuckDB } from "@/providers/DuckDBProvider";
 import { useCollection } from "../../../hooks/useCollection";
 import { parseDelimited, formatEDTFDate } from "../../../utils/formatters";
 import ImageReader from "../../../components/ImageReader";
@@ -114,13 +114,15 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
               );
 
               const images: string[] = [];
-              if (selectedRecord.image_count && selectedRecord.image_count > 0) {
-                  const firstId = identifiers[0].replace(/[^a-zA-Z0-9.-]/g, '_');
-                  for (let i = 0; i < selectedRecord.image_count; i++) {
-                      images.push(i === 0 ? firstId : `${firstId}_${i}`);
-                  }
-              } else {
-                  images.push(...identifiers.map((id: string) => id.replace(/[^a-zA-Z0-9.-]/g, '_')));
+              if (selectedRecord.has_image) {
+                if (selectedRecord.image_count && selectedRecord.image_count > 0) {
+                    const firstId = identifiers[0].replace(/[^a-zA-Z0-9.-]/g, '_');
+                    for (let i = 0; i < selectedRecord.image_count; i++) {
+                        images.push(i === 0 ? firstId : `${firstId}_${i}`);
+                    }
+                } else {
+                    images.push(...identifiers.map((id: string) => id.replace(/[^a-zA-Z0-9.-]/g, '_')));
+                }
               }
 
               return (

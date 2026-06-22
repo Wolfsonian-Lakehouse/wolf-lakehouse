@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { useDuckDB } from "../../../hooks/useDuckDB";
+import { useDuckDB } from "@/providers/DuckDBProvider";
 import { toJpeg } from 'html-to-image';
 
 export default function MerchMockupPage({ params }: { params: Promise<{ identifier: string }> }) {

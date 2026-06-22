@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import Chatbot from "../components/Chatbot";
+import { DuckDBProvider } from "@/providers/DuckDBProvider";
 
 export default function RootLayout({
   children,
@@ -30,8 +31,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <Chatbot />
+        <DuckDBProvider>
+          {children}
+          <Chatbot />
+        </DuckDBProvider>
       </body>
     </html>
   );
