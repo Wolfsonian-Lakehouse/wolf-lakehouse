@@ -101,7 +101,7 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
       <div className="flex flex-col md:flex-row w-full h-full min-h-0">
         
         {/* Left side - Image */}
-        <div className="w-full md:w-1/2 bg-black border-b md:border-b-0 md:border-r border-white/20 relative flex flex-col overflow-hidden h-[50vh] md:h-auto">
+        <div className="w-full md:w-1/2 bg-black border-b md:border-b-0 md:border-r border-white/20 relative flex flex-col overflow-hidden h-[50vh] md:h-full">
           {loading ? (
             <div className="animate-spin h-16 w-16 border-4 border-white border-t-mca-cyan rounded-none mx-auto my-auto flex-shrink-0" />
           ) : selectedRecord ? (

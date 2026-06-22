@@ -4,6 +4,8 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useDuckDB } from "../../../hooks/useDuckDB";
 import { formatEDTFDate } from "../../../utils/formatters";
+import ImageReader from "../../../components/ImageReader";
+
 
 export default function CreatorPage({ params }: { params: Promise<{ name: string }> }) {
   const resolvedParams = use(params);
@@ -312,7 +314,7 @@ export default function CreatorPage({ params }: { params: Promise<{ name: string
           <div className="flex flex-col md:flex-row w-full h-full min-h-0">
             
             {/* Left side - Image */}
-            <div className="w-full md:w-1/2 bg-black border-b md:border-b-0 md:border-r border-white/20 relative flex flex-col p-8 overflow-y-auto overflow-x-hidden h-[50vh] md:h-auto custom-scrollbar">
+            <div className="w-full md:w-1/2 bg-black border-b md:border-b-0 md:border-r border-white/20 relative flex flex-col p-8 overflow-y-auto overflow-x-hidden h-[50vh] md:h-full">
               {isModalLoading ? (
                 <div className="animate-spin h-16 w-16 border-4 border-white border-t-mca-cyan rounded-none mx-auto my-auto flex-shrink-0" />
               ) : selectedRecord ? (
@@ -334,37 +336,7 @@ export default function CreatorPage({ params }: { params: Promise<{ name: string
                       images.push(...identifiers.map((id: string) => id.replace(/[^a-zA-Z0-9.-]/g, '_')));
                   }
 
-                  return images.map((id: string, idx: number) => {
-                    const imgSrc = `/images/${encodeURIComponent(id)}.jpg`;
-                    return (
-                      <div key={idx} className="relative w-full flex-shrink-0 flex flex-col items-center justify-center mb-16 last:mb-0 group/img min-h-[40vh] md:min-h-[70vh]">
-                        <img 
-                          src={imgSrc}
-                          alt={`${selectedRecord.title} - image ${idx + 1}`}
-                          className="object-contain w-full h-full drop-shadow-2xl z-10 cursor-zoom-in transition-transform duration-300 hover:scale-[1.02]"
-                          onClick={(e: any) => {
-                            e.stopPropagation();
-                            setZoomedImage(imgSrc);
-                          }}
-                          onError={(e: any) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                        <div className="absolute hidden inset-0 flex flex-col items-center justify-center bg-mca-black text-slate-600 text-[10px] uppercase font-bold tracking-widest">
-                          <span>[ NO IMAGE ${idx + 1} FOUND ]</span>
-                        </div>
-                        <a 
-                          href={imgSrc}
-                          download={`${id}.jpg`}
-                          className="absolute bottom-0 md:bottom-4 right-0 md:right-4 bg-mca-yellow text-mca-black font-black uppercase tracking-widest px-4 py-3 border-2 border-mca-yellow hover:bg-mca-black hover:text-mca-yellow transition-colors text-[10px] opacity-0 group-hover/img:opacity-100 focus:opacity-100 z-20"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          [⬇] DOWNLOAD JPG {identifiers.length > 1 ? `(${idx + 1}/${identifiers.length})` : ''}
-                        </a>
-                      </div>
-                    );
-                  });
+                  return <ImageReader images={images} selectedRecord={selectedRecord} setZoomedImage={setZoomedImage} />;
                 })()
               ) : null}
             </div>
