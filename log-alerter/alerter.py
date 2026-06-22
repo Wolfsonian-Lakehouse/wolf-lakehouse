@@ -11,7 +11,7 @@ SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 DESTINATION_EMAIL = os.environ.get("DESTINATION_EMAIL")
 
 KEYWORDS = ["ERROR", "FATAL", "Exception", "Traceback"]
-IGNORE_KEYWORDS = ["No Anthropic API key is set", "Suggested prompts generation failed"]
+IGNORE_KEYWORDS = ["No Anthropic API key is set", "Suggested prompts generation failed", "qa_errors"]
 
 def send_email(subject, body):
     if not all([SMTP_USER, SMTP_PASSWORD, DESTINATION_EMAIL]):

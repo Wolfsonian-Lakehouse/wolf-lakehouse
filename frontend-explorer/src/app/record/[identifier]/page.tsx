@@ -51,7 +51,7 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
         const matchSql = matchConditions.length > 0 ? `AND (${matchConditions.join(' OR ')})` : '';
 
         let relatedQuery = `
-          SELECT title, field_identifier, has_image 
+          SELECT title, field_identifier, has_image, image_count 
           FROM catalog 
           WHERE field_identifier != '${idEscaped}' AND field_identifier NOT LIKE '${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped}' 
           AND has_image = true 
@@ -65,7 +65,7 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
         // Fallback: If no semantic matches, just show 4 random visual records
         if (!relatedData || relatedData.length === 0) {
           const fallbackQuery = `
-            SELECT title, field_identifier, has_image 
+            SELECT title, field_identifier, has_image, image_count 
             FROM catalog 
             WHERE field_identifier != '${idEscaped}' AND field_identifier NOT LIKE '${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped}' 
             AND has_image = true 

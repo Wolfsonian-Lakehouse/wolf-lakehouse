@@ -55,7 +55,8 @@ export function useDuckDB() {
               decade_created,
               year_created,
               source_system,
-              has_image
+              has_image,
+              image_count
             FROM read_parquet('normalized_catalog.parquet')
             QUALIFY ROW_NUMBER() OVER (
               PARTITION BY COALESCE(field_identifier, CAST(id AS VARCHAR)) 

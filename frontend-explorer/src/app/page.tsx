@@ -214,7 +214,7 @@ export default function Home() {
       }
 
       const dataQuery = `
-        SELECT title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, source_system, has_image, field_linked_agent, field_subject, field_place_published, field_edtf_date_created
+        SELECT title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, source_system, has_image, image_count, field_linked_agent, field_subject, field_place_published, field_edtf_date_created
         FROM catalog 
         ${whereClause}
         ${orderByClause} LIMIT ${limit} OFFSET ${offset}
@@ -275,7 +275,7 @@ export default function Home() {
     
     try {
       const dataQuery = `
-        SELECT title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, source_system, has_image, field_linked_agent, field_subject, field_place_published, field_edtf_date_created 
+        SELECT title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, source_system, has_image, image_count, field_linked_agent, field_subject, field_place_published, field_edtf_date_created 
         FROM catalog 
         WHERE has_image = true 
         USING SAMPLE 24
@@ -320,7 +320,7 @@ export default function Home() {
         const matchSql = matchConditions.length > 0 ? `AND (${matchConditions.join(' OR ')})` : '';
 
         let relatedQuery = `
-          SELECT title, field_identifier, has_image 
+          SELECT title, field_identifier, has_image, image_count 
           FROM catalog 
           WHERE field_identifier != '${idEscaped}' AND field_identifier NOT LIKE '${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped}' 
           AND has_image = true 
@@ -334,7 +334,7 @@ export default function Home() {
         // Fallback: If no semantic matches, just show 4 random visual records
         if (!relatedData || relatedData.length === 0) {
           const fallbackQuery = `
-            SELECT title, field_identifier, has_image 
+            SELECT title, field_identifier, has_image, image_count 
             FROM catalog 
             WHERE field_identifier != '${idEscaped}' AND field_identifier NOT LIKE '${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped};%' AND field_identifier NOT LIKE '%; ${idEscaped}' 
             AND has_image = true 
