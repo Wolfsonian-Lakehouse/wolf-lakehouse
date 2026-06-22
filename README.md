@@ -183,21 +183,22 @@ The original purpose of the Lakehouse Frontend Explorer was to solve the institu
 * **Cost-Free Scaling:** Because the browser does all the computational work, the application can scale to thousands of simultaneous users without increasing cloud hosting costs.
 
 **Discovery & Navigation**
+* **Direct Standalone Routing:** We recently executed a sweeping architectural refactor to standardize the application's UX and navigation flow. We completely eliminated the legacy modal-based overlay system across all six search grids, replacing it with a clean, direct routing architecture utilizing standard Next.js navigation. Users now seamlessly navigate directly to dedicated, shareable standalone record pages to view the 50/50 metadata split, resulting in a leaner, faster application by successfully deleting over 1,100 lines of redundant state management.
 * **Interactive Historical Timeline:** Allows users to dynamically slide and filter the entire catalog by decade or specific years in real-time.
 * **"Surprise Me" Algorithmic Engine:** A serendipitous visual discovery tool that serves users a random, highly visual subset of the collection to encourage organic exploration.
 * **"More Like This" Semantic Discovery:** When viewing a record, the engine instantly queries DuckDB for 4 randomized, related records that share the same Subject, Genre, or Creator, encouraging users to dive down the rabbit hole.
-* **Dynamic Creator & Subject Dossiers:** Automatically generates dedicated landing pages that aggregate and display all cataloged works by a specific artist, designer, author, or subject. Clickable hyperlinks are integrated across the search grid and detailed modals for seamless navigation.
-* **Clean Metadata Modals:** Detail views automatically map internal database fields to user-friendly labels (e.g., Accession Number) and hide redundant system data to provide a pristine viewing experience.
+* **Dynamic Creator & Subject Dossiers:** Automatically generates dedicated landing pages that aggregate and display all cataloged works by a specific artist, designer, author, or subject. Clickable hyperlinks are integrated across the search grid and standalone record pages for seamless navigation.
+* **Clean Metadata Records:** Dedicated standalone pages automatically map internal database fields to user-friendly labels (e.g., Accession Number) and hide redundant system data to provide a pristine viewing experience.
 * **Infinite Scroll Grid:** A high-performance, Brutalist-themed masonry grid that can render thousands of images smoothly without pagination limits.
 * **Advanced Search Facets:** Easily filter by specific objects (Has Images toggle, Genre categories, etc.) directly from the top interface.
-* **Interactive Image Reader:** A sleek, brutalist-styled single-image viewer for multi-image records (like multi-page books or varied 3D views). It features keyboard navigation, Next/Prev controls, and a dynamic thumbnail strip that replaces endless scrolling with a focused reading experience.
+* **Interactive Image Reader:** A sleek, brutalist-styled single-image viewer for multi-image records (like multi-page books or varied 3D views). It features keyboard navigation, Next/Prev controls, and a dynamic thumbnail strip that replaces endless scrolling with a focused reading experience. It includes an interactive full-screen lightbox toggle, allowing the entire component—complete with thumbnails and controls—to fluidly expand for an immersive viewing experience.
 * **Smart Fallback Identifiers:** Seamlessly handles untitled items by safely falling back to their Accession Number, ensuring every record remains identifiable.
 
 **Staff & Researcher Tools**
 * **Browser-Native Staff Collections:** Staff can curate custom lists of catalog records directly within their browser memory (`localStorage`), allowing them to build research sets without ever needing to log in or create an account.
 * **Shareable Collection Links:** Users can instantly generate a custom serverless URL containing their curated item IDs, allowing them to share curated galleries with colleagues with zero backend architecture. 
 * **CSV Export Engine:** With a single click, users can instantly export their curated collections (including all 17 available data columns) into a formatted spreadsheet for exhibition planning, sharing, or downstream research.
-* **One-Click Image Downloads:** High-visibility download buttons integrated directly into the record modal, allowing staff to quickly save web-optimized JPEGs for their work.
+* **One-Click Image Downloads:** High-visibility download buttons integrated directly into the image reader, allowing staff to quickly save web-optimized JPEGs for their work.
 
 ---
 
