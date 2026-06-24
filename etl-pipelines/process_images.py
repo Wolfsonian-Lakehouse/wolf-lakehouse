@@ -33,9 +33,8 @@ def normalize_name(s):
     s = s.strip('.')
     return s
 
-def process_single_row(row):
-    identifier = row.get('field_identifier')
-    source_system = row.get('source_system')
+def process_single_row(row_data):
+    identifier, source_system = row_data
     
     if pd.isna(identifier) or not identifier:
         return 'skipped', [], []
@@ -172,7 +171,9 @@ if __name__ == "__main__":
     not_found_count = 0
     error_count = 0
     
-    rows = [row for _, row in df.iterrows()]
+    identifiers = df['field_identifier'].tolist()
+    source_systems = df['source_system'].tolist()
+    rows = list(zip(identifiers, source_systems))
     
     max_workers = 32
     print(f"Processing images using {max_workers} threads (Utilizing new RAM capacity)...")

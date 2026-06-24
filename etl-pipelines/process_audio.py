@@ -23,9 +23,7 @@ def normalize_name(s):
     s = s.strip('.')
     return s
 
-def process_single_row(row):
-    identifier = row.get('field_identifier')
-    
+def process_single_row(identifier):
     if pd.isna(identifier) or not identifier:
         return 'skipped', [], []
         
@@ -133,13 +131,13 @@ if __name__ == "__main__":
     not_found_count = 0
     error_count = 0
     
-    rows = [row for _, row in df.iterrows()]
+    identifiers = df['field_identifier'].tolist()
     
     max_workers = 8
     print(f"Processing audio using {max_workers} threads...")
     
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = {executor.submit(process_single_row, r): r for r in rows}
+        futures = {executor.submit(process_single_row, identifier): identifier for identifier in identifiers}
         
         for fut in tqdm(as_completed(futures), total=len(futures), desc="Processing audio"):
             res, detail1, detail2 = fut.result()

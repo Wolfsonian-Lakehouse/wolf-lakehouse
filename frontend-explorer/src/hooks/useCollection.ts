@@ -52,7 +52,9 @@ export function useCollection() {
   const updateCollection = (newCollection: any[]) => {
     setCollection(newCollection);
     try {
-      window.localStorage.setItem("wolfsonian_lakehouse_collection", JSON.stringify(newCollection));
+      window.localStorage.setItem("wolfsonian_lakehouse_collection", JSON.stringify(newCollection, (key, value) => 
+        typeof value === 'bigint' ? value.toString() : value
+      ));
       window.dispatchEvent(new CustomEvent("lakehouse_collection_update", { detail: newCollection }));
     } catch (e) {
       console.error("Failed to save collection to localStorage", e);
