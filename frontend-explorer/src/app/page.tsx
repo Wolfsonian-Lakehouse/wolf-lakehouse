@@ -9,16 +9,30 @@ import { parseDelimited, formatEDTFDate } from "../utils/formatters";
 
 export default function Home() {
   const { isReady, runQuery, error } = useDuckDB();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSystem, setSelectedSystem] = useState("ALL");
-  const [selectedGenre, setSelectedGenre] = useState("ALL");
-  const [hasImageOnly, setHasImageOnly] = useState(false);
-  const [hasAudioOnly, setHasAudioOnly] = useState(false);
-  const [selectedCreator, setSelectedCreator] = useState("ALL");
-  const [selectedSubject, setSelectedSubject] = useState("ALL");
-  const [selectedPlace, setSelectedPlace] = useState("ALL");
-  const [minYear, setMinYear] = useState<string>("");
-  const [maxYear, setMaxYear] = useState<string>("");
+  const getInitialState = (key: string, defaultValue: any) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const item = window.sessionStorage.getItem(key);
+        if (item !== null) {
+          return JSON.parse(item);
+        }
+      } catch (e) {
+        console.error("Error reading sessionStorage", e);
+      }
+    }
+    return defaultValue;
+  };
+
+  const [searchTerm, setSearchTerm] = useState(() => getInitialState('mca_search_term', ""));
+  const [selectedSystem, setSelectedSystem] = useState(() => getInitialState('mca_search_system', "ALL"));
+  const [selectedGenre, setSelectedGenre] = useState(() => getInitialState('mca_search_genre', "ALL"));
+  const [hasImageOnly, setHasImageOnly] = useState(() => getInitialState('mca_search_imageOnly', false));
+  const [hasAudioOnly, setHasAudioOnly] = useState(() => getInitialState('mca_search_audioOnly', false));
+  const [selectedCreator, setSelectedCreator] = useState(() => getInitialState('mca_search_creator', "ALL"));
+  const [selectedSubject, setSelectedSubject] = useState(() => getInitialState('mca_search_subject', "ALL"));
+  const [selectedPlace, setSelectedPlace] = useState(() => getInitialState('mca_search_place', "ALL"));
+  const [minYear, setMinYear] = useState<string>(() => getInitialState('mca_search_minYear', ""));
+  const [maxYear, setMaxYear] = useState<string>(() => getInitialState('mca_search_maxYear', ""));
   
   const [topCreators, setTopCreators] = useState<string[]>([]);
   const [topSubjects, setTopSubjects] = useState<string[]>([]);
@@ -27,16 +41,16 @@ export default function Home() {
   const [topCollections, setTopCollections] = useState<string[]>([]);
   
   const [timelineData, setTimelineData] = useState<{decade: number, count: number}[]>([]);
-  const [selectedDecade, setSelectedDecade] = useState<string>("ALL");
+  const [selectedDecade, setSelectedDecade] = useState<string>(() => getInitialState('mca_search_decade', "ALL"));
   
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<any[]>(() => getInitialState('mca_search_results', []));
   const [loading, setLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
-  const [filteredCount, setFilteredCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(() => getInitialState('mca_search_totalCount', 0));
+  const [filteredCount, setFilteredCount] = useState(() => getInitialState('mca_search_filteredCount', 0));
   const [debugInfo, setDebugInfo] = useState<string>("");
 
   // Infinite Scroll State
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => getInitialState('mca_search_page', 1));
   const [isAppending, setIsAppending] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -59,15 +73,57 @@ export default function Home() {
     handleSearch(1);
   };
 
+  const isInitialMount = useRef(true);
+  const initialResultsLength = useRef(results.length);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        window.sessionStorage.setItem('mca_search_term', JSON.stringify(searchTerm));
+        window.sessionStorage.setItem('mca_search_system', JSON.stringify(selectedSystem));
+        window.sessionStorage.setItem('mca_search_genre', JSON.stringify(selectedGenre));
+        window.sessionStorage.setItem('mca_search_imageOnly', JSON.stringify(hasImageOnly));
+        window.sessionStorage.setItem('mca_search_audioOnly', JSON.stringify(hasAudioOnly));
+        window.sessionStorage.setItem('mca_search_creator', JSON.stringify(selectedCreator));
+        window.sessionStorage.setItem('mca_search_subject', JSON.stringify(selectedSubject));
+        window.sessionStorage.setItem('mca_search_place', JSON.stringify(selectedPlace));
+        window.sessionStorage.setItem('mca_search_minYear', JSON.stringify(minYear));
+        window.sessionStorage.setItem('mca_search_maxYear', JSON.stringify(maxYear));
+        window.sessionStorage.setItem('mca_search_decade', JSON.stringify(selectedDecade));
+        window.sessionStorage.setItem('mca_search_page', JSON.stringify(page));
+        window.sessionStorage.setItem('mca_search_results', JSON.stringify(results));
+        window.sessionStorage.setItem('mca_search_totalCount', JSON.stringify(totalCount));
+        window.sessionStorage.setItem('mca_search_filteredCount', JSON.stringify(filteredCount));
+      } catch (e) {
+        console.error("Error saving to sessionStorage", e);
+      }
+    }
+  }, [searchTerm, selectedSystem, selectedGenre, hasImageOnly, hasAudioOnly, selectedCreator, selectedSubject, selectedPlace, minYear, maxYear, selectedDecade, page, results, totalCount, filteredCount]);
+
   useEffect(() => {
     if (isReady) {
-      setPage(1);
-      handleSearch(1);
-      fetchFacets();
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        if (initialResultsLength.current === 0) {
+          setPage(1);
+          handleSearch(1);
+        }
+        fetchFacets();
+      } else {
+        setPage(1);
+        handleSearch(1);
+        fetchFacets();
+      }
     }
   }, [isReady, selectedSystem, selectedGenre, hasImageOnly, hasAudioOnly, selectedCreator, selectedSubject, selectedPlace, minYear, maxYear, selectedDecade]);
 
+  const isInitialPageMount = useRef(true);
+
   useEffect(() => {
+    if (isInitialPageMount.current) {
+      isInitialPageMount.current = false;
+      return;
+    }
     if (page > 1) {
       handleSearch(page);
     }
@@ -76,7 +132,7 @@ export default function Home() {
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const target = entries[0];
     if (target.isIntersecting && !loading && !isAppending && results.length > 0 && results.length < filteredCount) {
-      setPage((prev) => prev + 1);
+      setPage((prev: number) => prev + 1);
     }
   }, [loading, isAppending, results.length, filteredCount]);
 
