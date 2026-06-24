@@ -2,6 +2,7 @@ import pandas as pd
 import logging
 import sys
 import re
+import unicodedata
 from pathlib import Path
 
 UNIFIED_CATALOG = Path('/app/data/gold/unified_catalog.parquet')
@@ -109,10 +110,13 @@ def normalize_creator(val):
     agents = val_str.split('|')
     clean_agents = []
     
-    # Add mapping dictionary for common name spelling variants
+    # Add mapping dictionary for common name spelling variants (lowercase keys)
     CREATOR_ALIASES = {
-        'Josef Grof': 'József Gróf',
-        'Josef Gróf': 'József Gróf',
+        'josef grof': 'József Gróf',
+        'josef gróf': 'József Gróf',
+        'wiener werkstaette': 'Wiener Werkstätte',
+        'wiener werkstatte': 'Wiener Werkstätte',
+        'wiener werkstätte': 'Wiener Werkstätte',
         # Add more mappings here as you find them!
     }
     
@@ -129,8 +133,9 @@ def normalize_creator(val):
         name = name.rstrip('.,;')
         
         # Apply alias mapping if it exists
-        if name in CREATOR_ALIASES:
-            name = CREATOR_ALIASES[name]
+        lower_name = name.lower()
+        if lower_name in CREATOR_ALIASES:
+            name = CREATOR_ALIASES[lower_name]
             
         if name:
             clean_agents.append(name)
@@ -262,6 +267,21 @@ if __name__ == '__main__':
             logging.info('✅ Normalized has_image completeness flag.')
     else:
         df['has_image'] = False
+
+    # --- Search Optimization ---
+    logging.info('Creating normalized search_text column...')
+    def remove_accents(input_str):
+        if pd.isna(input_str):
+            return ''
+        nfd_form = unicodedata.normalize('NFD', str(input_str))
+        return ''.join([c for c in nfd_form if not unicodedata.combining(c)])
+
+    search_cols = ['title', 'field_identifier', 'field_collection_type', 'field_collection_note', 'field_credit_line', 'field_extent', 'field_physical_form', 'field_genre', 'field_description_long', 'field_linked_agent', 'field_subject', 'field_place_published', 'source_system']
+    search_cols = [c for c in search_cols if c in df.columns]
+    
+    df['search_text'] = df[search_cols].fillna('').astype(str).agg(' '.join, axis=1)
+    df['search_text'] = df['search_text'].apply(remove_accents).str.lower()
+    logging.info('✅ Created search_text column.')
 
     # --- Drop fully empty columns ---
     before = len(df.columns)

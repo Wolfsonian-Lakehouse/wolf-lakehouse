@@ -216,7 +216,8 @@ export default function Home() {
                 sqlCondition += ` AND `;
               }
               const e = token.replace(/(^"|"$)/g, '').replace(/'/g, "''").toLowerCase();
-              sqlCondition += `lower(CONCAT_WS(' ', title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, field_linked_agent, field_subject, field_place_published, field_edtf_date_created, source_system)) LIKE '%${e}%'`;
+              const unaccented = e.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+              sqlCondition += `search_text LIKE '%${unaccented}%'`;
               expectOperator = true;
             }
           }
@@ -225,7 +226,8 @@ export default function Home() {
           if (terms.length > 0) {
             const termConditions = terms.map((term: string) => {
               const escapedSearch = term.replace(/'/g, "''").toLowerCase();
-              return `lower(CONCAT_WS(' ', title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, field_linked_agent, field_subject, field_place_published, field_edtf_date_created, source_system)) LIKE '%${escapedSearch}%'`;
+              const unaccented = escapedSearch.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+              return `search_text LIKE '%${unaccented}%'`;
             });
             sqlCondition = termConditions.join(' OR ');
           }
