@@ -28,10 +28,10 @@ predefined_cols = [
     'country_code', 'field_lvr', 'source_system'
 ]
 
-if __name__ == "__main__":
+def main():
     if not SILVER_ALMA.exists() and not SILVER_PROFICIO.exists():
         logging.warning("No Silver databases found. Cannot generate unified catalog.")
-        sys.exit(0)
+        return
         
     logging.info("--- 🔄 GENERATE GOLD UNIFIED CATALOG ---")
     
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         dfs.append(df_proficio)
         
     if not dfs:
-        sys.exit(0)
+        return
         
     logging.info("Merging datasets...")
     # Concatenate all available sources
@@ -159,3 +159,7 @@ if __name__ == "__main__":
         json.dump(metrics, f)
         
     logging.info("✅ Gold Unified Catalog generation complete!")
+
+
+if __name__ == "__main__":
+    main()

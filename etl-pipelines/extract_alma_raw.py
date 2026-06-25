@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 import pymarc
 from pathlib import Path
@@ -12,11 +13,11 @@ def get_latest_marc_file(directory):
     found_mrc_files = list(directory.glob("BIBLIOGRAPHIC*.mrc"))
     
     if not found_mrc_files:
-        print(f" ❌ Error: No BIBLIOGRAPHIC*.mrc files found in {directory}")
-        sys.exit(1)
+        logging.info(f" ❌ Error: No BIBLIOGRAPHIC*.mrc files found in {directory}")
+        raise RuntimeError("Task Failed. Check logs for details.")
         
     target_file = sorted(found_mrc_files) [-1]
-    print(f" 🎯 Dynamically loaded MARC file: {target_file.name}")
+    logging.info(f" 🎯 Dynamically loaded MARC file: {target_file.name}")
     return target_file
 
 def extract_raw_marc(record):
@@ -325,33 +326,37 @@ def extract_raw_marc(record):
 
     return data
 
-if __name__ == "__main__":
-    print("--- 📥 Starting Alma MARC Raw Extractor ---")
+def main():
+    logging.info("--- 📥 Starting Alma MARC Raw Extractor ---")
     
     marc_file_path = get_latest_marc_file(raw_alma_dir)
     all_marc_data = []
 
-    print(" 🚀 Parsing binary MARC records (this might take a moment)...")
+    logging.info(" 🚀 Parsing binary MARC records (this might take a moment)...")
     try:
         with open(marc_file_path, 'rb') as mf:
             reader = pymarc.MARCReader(mf, to_unicode=True, force_utf8=True, hide_utf8_warnings=True)
             for record_count, record in enumerate(reader):
                 if record is None:
-                    print(f" ⚠️ Warning: Skipped a None record at position {record_count}.")
+                    logging.info(f" ⚠️ Warning: Skipped a None record at position {record_count}.")
                     continue
                 all_marc_data.append(extract_raw_marc(record))
     except Exception as e:
-        print(f" ❌ Error reading MARC file: {e}")
-        sys.exit(1)
+        logging.info(f" ❌ Error reading MARC file: {e}")
+        raise RuntimeError("Task Failed. Check logs for details.")
 
     df = pd.DataFrame(all_marc_data)
 
     if not df.empty:
         output_parquet.parent.mkdir(parents=True, exist_ok=True)
 
-        print(f" 💾 Saving to Parquet file: {output_parquet}")
+        logging.info(f" 💾 Saving to Parquet file: {output_parquet}")
         df.to_parquet(output_parquet, index=False, engine='pyarrow')
         
-        print(f" ✅ Successfully dumped {len(df)} wide records to staging.")
+        logging.info(f" ✅ Successfully dumped {len(df)} wide records to staging.")
     else:
-        print(" ❌ No data extracted. Parquet file was not created.")
+        logging.info(" ❌ No data extracted. Parquet file was not created.")
+
+
+if __name__ == "__main__":
+    main()

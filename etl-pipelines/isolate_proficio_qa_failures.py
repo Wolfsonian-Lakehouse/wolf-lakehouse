@@ -24,10 +24,10 @@ def run_qa_checks(row):
         
     return errors
 
-if __name__ == "__main__":
+def main():
     if not MASTER_SILVER.exists():
         logging.warning("No Master Silver file found. Skipping QA.")
-        sys.exit(0)
+        return
         
     logging.info("--- 🔍 RUN QA CHECKS ---")
     df_master = pd.read_parquet(MASTER_SILVER)
@@ -60,3 +60,7 @@ if __name__ == "__main__":
     metrics['proficio_qa_failures'] = len(df_fail)
     with open(metrics_path, 'w') as f:
         json.dump(metrics, f)
+
+
+if __name__ == "__main__":
+    main()

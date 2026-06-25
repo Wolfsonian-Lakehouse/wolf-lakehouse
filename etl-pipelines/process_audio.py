@@ -104,7 +104,7 @@ def process_single_row(identifier):
     else:
         return 'not_found', [], []
 
-if __name__ == "__main__":
+def main():
     print("--- 🎵 STARTING LOCAL AUDIO INGESTION PIPELINE ---")
     
     if not PARQUET_FILE.exists():
@@ -185,3 +185,7 @@ if __name__ == "__main__":
     
     df.to_parquet(PARQUET_FILE, index=False)
     print("✅ Catalog updated with audio_count and has_audio flags.")
+
+
+if __name__ == "__main__":
+    main()

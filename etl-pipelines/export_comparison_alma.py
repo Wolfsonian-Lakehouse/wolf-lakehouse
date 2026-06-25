@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def run_comparison():
     if not ALMA_SILVER.exists() or not RAW_ISLANDORA.exists():
         logging.warning("Missing required Alma Silver or Islandora Raw files.")
-        sys.exit(0)
+        return
         
     logging.info("--- 🔄 GENERATE ALMA-ISLANDORA COMPARISON ---")
     
@@ -99,5 +99,9 @@ def run_comparison():
     merged_df.to_parquet(OUTPUT_PARQUET, index=False)
     logging.info(f"Saved Gold Parquet results to {OUTPUT_PARQUET}")
 
-if __name__ == "__main__":
+def main():
     run_comparison()
+
+
+if __name__ == "__main__":
+    main()

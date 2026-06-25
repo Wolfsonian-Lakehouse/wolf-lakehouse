@@ -129,5 +129,9 @@ def run_audit():
     logging.info(f"Records with Processed Thumbnail: {proc_completeness} ({proc_pct:.2f}%)")
     logging.info(f"Audit report saved to {OUTPUT_CSV}")
 
-if __name__ == "__main__":
+def main():
     run_audit()
+
+
+if __name__ == "__main__":
+    main()

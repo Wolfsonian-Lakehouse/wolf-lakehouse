@@ -18,7 +18,7 @@ def create_views():
             logging.warning("⚠️ DuckDB file is locked (likely by Metabase).")
             logging.warning("Skipping view recreation. Metabase will automatically query the freshly updated Parquet files!")
             import sys
-            sys.exit(0)
+            return
         else:
             raise e
     
@@ -58,5 +58,9 @@ def create_views():
     con.close()
     logging.info("DuckDB setup complete! Ready for Metabase.")
 
-if __name__ == "__main__":
+def main():
     create_views()
+
+
+if __name__ == "__main__":
+    main()

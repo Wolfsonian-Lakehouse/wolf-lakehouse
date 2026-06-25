@@ -28,10 +28,10 @@ logging.basicConfig(
 )
 logging.info("🚀 Alma Silver Transformer initialized.")
 
-if __name__ == "__main__":
+def main():
     if not RAW_ALMA.exists():
         logging.warning(f"Alma raw file not found at {RAW_ALMA}. Ensure extract_alma_raw.py runs first.")
-        sys.exit(0)
+        return
         
     logging.info(f"📥 Loading raw Alma data from {RAW_ALMA}")
     try:
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         logging.info(f"Loaded {len(df)} raw records with {len(df.columns)} columns.")
     except Exception as e:
         logging.error(f"Failed to read raw parquet: {e}")
-        sys.exit(1)
+        raise RuntimeError("Task Failed. Check logs for details.")
         
     logging.info("🛠️ Applying Silver transformations...")
     
@@ -188,3 +188,7 @@ if __name__ == "__main__":
         json.dump(metrics, f)
         
     logging.info("✅ Alma Silver Pipeline Finished!")
+
+
+if __name__ == "__main__":
+    main()

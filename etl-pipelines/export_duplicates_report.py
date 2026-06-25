@@ -44,10 +44,10 @@ def normalize_and_split_identifiers(df, source_name):
     
     return df_exploded
 
-if __name__ == "__main__":
+def main():
     if not SILVER_ALMA.exists() or not SILVER_PROFICIO.exists():
         logging.warning("Missing Alma or Proficio silver data. Cannot run duplicates report.")
-        sys.exit(0)
+        return
         
     logging.info("--- 🔍 GENERATING DUPLICATES REPORT ---")
     
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     
     if len(intersecting_ids) == 0:
         logging.info("No duplicates found! Exiting.")
-        sys.exit(0)
+        return
         
     # Filter the exploded dataframes for only the overlapping IDs
     alma_dupes = alma_exploded[alma_exploded['match_id'].isin(intersecting_ids)]
@@ -86,3 +86,7 @@ if __name__ == "__main__":
     report_df.to_csv(OUTPUT_CSV, index=False)
     
     logging.info(f"✅ Saved duplicates report to {OUTPUT_CSV}")
+
+
+if __name__ == "__main__":
+    main()

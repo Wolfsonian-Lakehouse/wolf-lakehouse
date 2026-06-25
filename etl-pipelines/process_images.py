@@ -126,7 +126,7 @@ def process_single_row(row_data):
     else:
         return 'not_found', [], []
 
-if __name__ == "__main__":
+def main():
     print("--- 📸 STARTING LOCAL IMAGE INGESTION PIPELINE (PARALLEL MODE) ---")
     
     if not PARQUET_FILE.exists():
@@ -231,3 +231,7 @@ if __name__ == "__main__":
     # Save the updated dataframe back to parquet
     df.to_parquet(PARQUET_FILE, index=False)
     print("✅ Catalog updated with image_count and has_image flags.")
+
+
+if __name__ == "__main__":
+    main()

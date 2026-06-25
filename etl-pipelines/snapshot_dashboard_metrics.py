@@ -271,6 +271,10 @@ def snapshot_metrics():
         con.execute(f"COPY {metric_name} TO '{history_file}' (FORMAT PARQUET)")
         logging.info(f"Successfully saved {history_file}")
 
-if __name__ == '__main__':
+def main():
     logging.info("--- 📊 Starting Dashboard Metrics Snapshot Microservice ---")
     snapshot_metrics()
+
+
+if __name__ == "__main__":
+    main()

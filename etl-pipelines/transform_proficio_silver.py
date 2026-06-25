@@ -207,7 +207,7 @@ def normalize_identifier(s):
 # MAIN PIPELINE EXECUTION
 # ==========================================
 
-if __name__ == "__main__":
+def main():
     logging.info("--- 🔄 1. PROCESS PROFICIO DELTAS (SILVER LAYER) ---")
     
     delta_files = list(DELTA_DIR.glob('*.parquet'))
@@ -304,7 +304,7 @@ if __name__ == "__main__":
 
     if df_master.empty:
         logging.warning("No data in Silver Master or Deltas. Exiting.")
-        sys.exit(0)
+        return
 
     # Clean string columns and drop completely empty ones (prevents DuckDB 'UNKNOWN' type crashes)
     str_cols = df_master.select_dtypes(include=['object', 'string']).columns
@@ -340,3 +340,7 @@ if __name__ == "__main__":
 
 
     logging.info("--- ✅ Pipeline Finished ---")
+
+
+if __name__ == "__main__":
+    main()

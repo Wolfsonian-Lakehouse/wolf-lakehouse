@@ -21,10 +21,10 @@ def normalize_identifier(s):
     s = s.strip('.')
     return s
 
-if __name__ == "__main__":
+def main():
     if not UNIFIED_CATALOG.exists() or not RAW_ISLANDORA.exists():
         logging.warning("Missing required Unified Catalog or Islandora files.")
-        sys.exit(0)
+        return
         
     logging.info("--- 🔄 GENERATE GOLD MISSING OBJECTS ---")
     
@@ -133,3 +133,7 @@ if __name__ == "__main__":
     metrics['missing_objects_found'] = missing_count
     with open(metrics_path, 'w') as f:
         json.dump(metrics, f)
+
+
+if __name__ == "__main__":
+    main()

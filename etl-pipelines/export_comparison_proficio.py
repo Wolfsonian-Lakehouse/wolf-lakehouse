@@ -24,7 +24,7 @@ def normalize_identifier(s):
 def run_comparison():
     if not PROFICIO_SILVER.exists() or not RAW_ISLANDORA.exists():
         logging.warning("Missing required Proficio Silver or Islandora Raw files.")
-        sys.exit(0)
+        return
         
     logging.info("--- 🔄 GENERATE PROFICIO-ISLANDORA COMPARISON ---")
     
@@ -88,5 +88,9 @@ def run_comparison():
     logging.info(f"Comparison complete! Found {missing_count} missing and {matched_count} matched objects.")
     logging.info(f"Saved Gold Parquet results to {OUTPUT_PARQUET}")
 
-if __name__ == "__main__":
+def main():
     run_comparison()
+
+
+if __name__ == "__main__":
+    main()

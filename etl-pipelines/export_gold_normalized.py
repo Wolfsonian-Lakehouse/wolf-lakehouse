@@ -189,10 +189,10 @@ def normalize_place_published(val):
 # ---------------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------------
-if __name__ == '__main__':
+def main():
     if not UNIFIED_CATALOG.exists():
         logging.warning(f'Unified catalog not found at {UNIFIED_CATALOG}. Run export_gold_unified_catalog.py first.')
-        sys.exit(0)
+        return
 
     logging.info('--- 🔄 GENERATE GOLD NORMALIZED CATALOG ---')
     df = pd.read_parquet(UNIFIED_CATALOG)
@@ -293,3 +293,7 @@ if __name__ == '__main__':
     logging.info(f'💾 Saved Normalized Catalog: {OUTPUT_PARQUET}')
     logging.info(f'Final Shape: {len(df)} records, {len(df.columns)} columns.')
     logging.info('✅ Gold Normalized Catalog complete!')
+
+
+if __name__ == "__main__":
+    main()

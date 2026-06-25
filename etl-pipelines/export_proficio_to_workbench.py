@@ -25,5 +25,9 @@ def export_for_workbench():
     df.to_csv(OUTPUT_CSV, index=False, encoding='utf-8', errors='replace')
     logging.info(f"✅ Successfully generated Workbench CSV at {OUTPUT_CSV}")
 
-if __name__ == "__main__":
+def main():
     export_for_workbench()
+
+
+if __name__ == "__main__":
+    main()

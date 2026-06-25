@@ -1,4 +1,3 @@
-import subprocess
 import logging
 import json
 import os
@@ -7,108 +6,120 @@ from prefect import flow, task
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def run_script(script_path: str):
-    """Runs a Python script as a subprocess and raises an error if it fails."""
-    logger.info(f"Running script: {script_path}")
-    result = subprocess.run(['python', script_path])
-    if result.returncode != 0:
-        raise RuntimeError(f"Script {script_path} failed with exit code {result.returncode}")
-    else:
-        logger.info(f"Successfully ran {script_path}")
+# Imports from ETL scripts
+import extract_proficio_raw
+import extract_islandora_raw
+import extract_alma_raw
+import transform_proficio_silver
+import transform_alma_silver
+import isolate_proficio_qa_failures
+import export_gold_missing_objects
+import export_duplicates_report
+import export_gold_unified_catalog
+import export_comparison_proficio
+import export_comparison_alma
+import export_image_audit_report
+import export_gold_normalized
+import snapshot_dashboard_metrics
+import export_proficio_to_workbench
+import export_alma_to_workbench
+import build_duckdb_views
+import process_images
+import process_audio
 
 # ==========================================
 # 1. BRONZE LAYER (Extraction)
 # ==========================================
 @task(name="Extract Proficio Raw")
 def extract_proficio():
-    run_script('etl-pipelines/extract_proficio_raw.py')
+    extract_proficio_raw.main()
 
 @task(name="Extract Islandora Raw")
 def extract_islandora():
-    run_script('etl-pipelines/extract_islandora_raw.py')
+    extract_islandora_raw.main()
 
 @task(name="Extract Alma Raw")
 def extract_alma():
-    run_script('etl-pipelines/extract_alma_raw.py')
+    extract_alma_raw.main()
 
 # ==========================================
 # 2. SILVER LAYER (Cleansing & Merging)
 # ==========================================
 @task(name="Transform Proficio Silver")
 def transform_proficio():
-    run_script('etl-pipelines/transform_proficio_silver.py')
+    transform_proficio_silver.main()
 
 @task(name="Transform Alma Silver")
 def transform_alma():
-    run_script('etl-pipelines/transform_alma_silver.py')
+    transform_alma_silver.main()
 
 # ==========================================
 # 3. GOLD LAYER (Validation & Export)
 # ==========================================
 @task(name="Isolate QA Failures")
 def isolate_qa_failures():
-    run_script('etl-pipelines/isolate_proficio_qa_failures.py')
+    isolate_proficio_qa_failures.main()
 
 @task(name="Generate Gold Missing Objects")
 def generate_missing_objects():
-    run_script('etl-pipelines/export_gold_missing_objects.py')
+    export_gold_missing_objects.main()
 
 @task(name="Generate Duplicates Report")
 def generate_duplicates_report():
-    run_script('etl-pipelines/export_duplicates_report.py')
+    export_duplicates_report.main()
 
 @task(name="Generate Gold Unified Catalog")
 def generate_unified_catalog():
-    run_script('etl-pipelines/export_gold_unified_catalog.py')
+    export_gold_unified_catalog.main()
 
 @task(name="Generate Comparison Proficio")
 def generate_comparison_proficio():
-    run_script('etl-pipelines/export_comparison_proficio.py')
+    export_comparison_proficio.main()
 
 @task(name="Generate Comparison Alma")
 def generate_comparison_alma():
-    run_script('etl-pipelines/export_comparison_alma.py')
+    export_comparison_alma.main()
 
 @task(name="Generate Image Audit Report")
 def generate_image_audit_report():
-    run_script('etl-pipelines/export_image_audit_report.py')
+    export_image_audit_report.main()
 
 @task(name="Normalize Gold Catalog")
 def normalize_catalog():
-    run_script('etl-pipelines/export_gold_normalized.py')
+    export_gold_normalized.main()
 
 @task(name="Snapshot Dashboard Metrics")
-def snapshot_dashboard_metrics():
-    run_script('etl-pipelines/snapshot_dashboard_metrics.py')
+def snapshot_dashboard_metrics_task():
+    snapshot_dashboard_metrics.main()
 
 @task(name="Export Proficio to Workbench")
 def export_proficio():
-    run_script('etl-pipelines/export_proficio_to_workbench.py')
+    export_proficio_to_workbench.main()
 
 @task(name="Export Alma to Workbench")
 def export_alma():
-    run_script('etl-pipelines/export_alma_to_workbench.py')
+    export_alma_to_workbench.main()
 
 # ==========================================
 # 4. SERVING LAYER (DuckDB Metabase)
 # ==========================================
 @task(name="Build DuckDB Metabase Views")
 def build_duckdb():
-    run_script('etl-pipelines/build_duckdb_views.py')
+    build_duckdb_views.main()
 
 # ==========================================
 # 4.5. IMAGES LAYER (NFS Ingestion)
 # ==========================================
 @task(name="Ingest and Convert NFS Images")
 def process_images_task():
-    run_script('etl-pipelines/process_images.py')
+    process_images.main()
 
 # ==========================================
 # 4.6. AUDIO LAYER (NFS Ingestion)
 # ==========================================
 @task(name="Ingest and Convert NFS Audio")
 def process_audio_task():
-    run_script('etl-pipelines/process_audio.py')
+    process_audio.main()
 
 # ==========================================
 # 5. MONITORING
@@ -162,7 +173,7 @@ def lakehouse_flow():
     missing_objects = generate_missing_objects.submit(wait_for=[qa_failures, islandora_raw, unified_catalog])
     comparison_proficio = generate_comparison_proficio.submit(wait_for=[proficio_silver, islandora_raw])
     comparison_alma = generate_comparison_alma.submit(wait_for=[alma_silver, islandora_raw])
-    history_metrics = snapshot_dashboard_metrics.submit(wait_for=[alma_silver, islandora_raw, normalized_catalog])
+    history_metrics = snapshot_dashboard_metrics_task.submit(wait_for=[alma_silver, islandora_raw, normalized_catalog])
     image_audit = generate_image_audit_report.submit(wait_for=[normalized_catalog])
 
     # 5. Export Phase (CSV to Workbench)
