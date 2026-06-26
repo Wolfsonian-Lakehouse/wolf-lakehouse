@@ -44,7 +44,7 @@ def main():
         'field_genre', 'field_edtf_date_created', 'field_place_published',
         'field_subject', 'field_description_long', 'field_credit_line',
         'field_physical_form', 'field_extent', 'field_collection_type',
-        'qa_pass', 'location'
+        'qa_pass', 'sortable4'
     ]
     
     master_cols = [c for c in master_schema if c in final_cols_to_keep]
@@ -105,7 +105,7 @@ def main():
             'field_genre', 'field_edtf_date_created', 'field_place_published',
             'field_subject', 'field_description_long', 'field_credit_line',
             'field_physical_form', 'field_extent', 'field_collection_type',
-            'qa_pass', 'location'
+            'qa_pass', 'sortable4'
         ]
         
         if identifier_column != 'field_identifier':

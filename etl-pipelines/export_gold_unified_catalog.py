@@ -25,7 +25,7 @@ predefined_cols = [
     'field_physical_form', 'field_collection_note', 'field_note', 'field_place_published',
     'field_geographic_subject', 'field_subject_pictured', 'field_language', 
     'field_subject', 'field_subjects_name', 'field_temporal_subject', 'three_letter_code',
-    'country_code', 'field_lvr', 'source_system', 'location'
+    'country_code', 'field_lvr', 'source_system', 'sortable4'
 ]
 
 def main():

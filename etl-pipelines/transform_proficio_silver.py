@@ -237,8 +237,7 @@ def main():
             'obj_mem': 'field_description_long',
             'categ_4': 'field_credit_line',
             'class': 'field_physical_form',
-            'weight': 'field_extent',
-            'sortable4': 'location'
+            'weight': 'field_extent'
         }
         df_deltas = df_deltas.rename(columns=rename_map)
         

@@ -108,6 +108,8 @@ export function useCollection() {
         } else if (header === "spreadsheet_thumbnail") {
           // This formula renders the actual image inside a cell in Google Sheets and newer Excel versions!
           val = imageUrl ? `=IMAGE("${imageUrl}")` : "";
+        } else if (header === "location") {
+          val = row["location"] || row["sortable4"];
         } else {
           val = row[header];
         }
