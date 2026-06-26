@@ -132,7 +132,7 @@ export default function ImageReader({ images, selectedRecord }: ImageReaderProps
           </a>
         </div>
         
-        <div className="absolute bottom-4 left-4 z-20">
+        <div className="absolute bottom-4 left-4 z-20 flex flex-col gap-2 items-start">
           <Link 
             href={`/merch/${encodeURIComponent(selectedRecord.field_identifier)}`}
             className="bg-white text-mca-black font-black uppercase tracking-widest px-4 py-3 border-2 border-white hover:bg-mca-black hover:text-white transition-colors text-[10px] shadow-xl"
@@ -140,6 +140,15 @@ export default function ImageReader({ images, selectedRecord }: ImageReaderProps
           >
             [👕] VIEW ON MERCH
           </Link>
+          <a 
+            href="https://wolfsonian.org/research/image-reproductions/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-mca-cyan text-mca-black font-black uppercase tracking-widest px-4 py-3 border-2 border-mca-cyan hover:bg-mca-black hover:text-mca-cyan transition-colors text-[10px] shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            [↗] REQUEST DIGITIZATION
+          </a>
         </div>
       </div>
 
