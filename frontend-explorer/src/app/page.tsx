@@ -524,7 +524,7 @@ export default function Home() {
                 {[
                   { key: "ALL", label: "ALL COLLECTIONS" },
                   { key: "Alma", label: "LIBRARY (ALMA)" },
-                  { key: "Proficio", label: "MUSEUM (PROFICIO)" }
+                  { key: "Proficio", label: "OBJECTS (PROFICIO)" }
                 ].map((opt) => (
                   <button
                     key={opt.key}
