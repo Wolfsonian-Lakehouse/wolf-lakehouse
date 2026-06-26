@@ -35,7 +35,7 @@ The Wolfsonian Lakehouse is an automated, incremental ELT (Extract, Load, Transf
 In addition to the data pipeline, the project features a powerful **Frontend Explorer**—a serverless, zero-latency web application built with Next.js and DuckDB WebAssembly. This custom interface directly queries the compressed Parquet data right inside the user's browser, allowing staff, researchers, and the public to visually search, filter, and curate collections across all 115,000+ unified library and museum records without the need for expensive database hosting or backend architecture.
 
 ## 🏗️ Architecture & Tech Stack
-* **Orchestration:** Prefect 3 (Native 19-Node DAG), Docker Compose, and Make
+* **Orchestration:** Prefect 3 (Native 20-Node DAG), Docker Compose, and Make
 * **Data Extraction:** Python 3.10 (Pandas, PyArrow, requests, pymarc) with strictly pinned dependencies for deterministic builds.
 * **Database Connectivity:** SQLAlchemy, pyodbc (ODBC Driver 18 for SQL Server)
 * **Authentication:** Automated Kerberos (`kinit`) integration inside containers
@@ -75,7 +75,7 @@ In addition to the data pipeline, the project features a powerful **Frontend Exp
 * **Automated Audio Ingestion:** Recursively scans the `Islandora_Audio` network drive to ingest, parse, and map `.mp3` and `.wav` audio files directly to unified catalog identifiers using high-performance, memory-optimized multi-threading.
 * **Storage Protection & Web Resizing:** Converts large ~10MB+ TIFFs into highly compressed JPEGs restricted to a maximum of 1200px on the longest side and saved at quality 80. This reduces file size by ~20x-50x (down to ~200KB per image), allowing the full ~56k image catalog to fit in less than 13GB of local disk space while drastically accelerating webpage loading times.
 * **Cross-System Deduplication:** Dynamically reconciles identifiers between Library (Alma) and Museum (Proficio) catalogs, natively handling Alma's semicolon-separated multi-accession numbers to prioritize Museum records. A reporting script automatically generates exact collision matches for manual staff review on every pipeline run.
-* **Native Workflow Orchestration:** The pipeline execution is managed natively by Prefect. The core logic operates as a 19-node Directed Acyclic Graph (DAG) using direct function imports. This ensures stateful execution, robust exception handling, and highly granular task-level monitoring via the Prefect dashboard without relying on fragile sub-shells.
+* **Native Workflow Orchestration:** The pipeline execution is managed natively by Prefect. The core logic operates as a 20-node Directed Acyclic Graph (DAG) using direct function imports. This ensures stateful execution, robust exception handling, and highly granular task-level monitoring via the Prefect dashboard without relying on fragile sub-shells.
 * **Automated Uptime & Error Alerting:** A dedicated Uptime Kuma container continuously tracks the health of all web and orchestration endpoints. Alongside this, a custom local Python microservice continuously tails the Docker logs, instantly dispatching SMTP email alerts to the team if any container throws a critical error or exception.
 
 ---
