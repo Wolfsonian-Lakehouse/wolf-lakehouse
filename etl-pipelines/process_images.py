@@ -19,6 +19,11 @@ if hasattr(TiffImagePlugin, 'MAX_SAMPLESPERPIXEL'):
 DIGITAL_IMAGES_DIR = Path('/app/data/raw/digital_images')
 OUTPUT_DIR = Path('/app/data/gold/images')
 PARQUET_FILE = Path('/app/data/gold/unified_catalog_normalized.parquet')
+ERROR_REPORT_FILE = Path('/app/data/gold/image_corruptions_report.csv')
+
+FATAL_FILES_TO_SKIP = [
+    # Add files here that cause libtiff infinite loop hangs
+]
 
 # Global caches for threads
 existing_folders = {}
@@ -98,6 +103,10 @@ def process_single_row(row_data):
                                 if dest_filename in existing_dest_images:
                                     already_exists.append(dest_filename)
                                     continue
+                                    
+                                if best_file.name in FATAL_FILES_TO_SKIP:
+                                    errors.append(f"{best_file.name}: Skipped due to FATAL_FILES_TO_SKIP blocklist (infinite loop bug)")
+                                    continue
 
                                 print(f"DEBUG: Attempting to process {best_file.name}...")
                                 with Image.open(best_file) as img:
@@ -169,6 +178,7 @@ def main():
     already_exists_count = 0
     not_found_count = 0
     error_count = 0
+    all_errors_list = []
     
     identifiers = df['field_identifier'].tolist()
     source_systems = df['source_system'].tolist()
@@ -192,6 +202,7 @@ def main():
             elif res == 'error':
                 error_count += 1
                 for err in detail1:
+                    all_errors_list.append(err)
                     # Silence standard warning outputs in threads
                     if "DecompressionBombWarning" not in str(err):
                         print(f"⚠️ {err}")
@@ -202,6 +213,11 @@ def main():
     print(f"   Not Found in NFS: {not_found_count}")
     print(f"   Errors: {error_count}")
     print(f"   Total JPEGs stored locally: {len(list(OUTPUT_DIR.glob('*.jpg')))}")
+    
+    if all_errors_list:
+        print(f"Saving error report to {ERROR_REPORT_FILE}...")
+        error_df = pd.DataFrame({'error_details': all_errors_list})
+        error_df.to_csv(ERROR_REPORT_FILE, index=False)
 
     # 3. Update the catalog with image counts
     print("Updating catalog with image counts...")
