@@ -108,12 +108,10 @@ def main():
     print("--- 🎵 STARTING LOCAL AUDIO INGESTION PIPELINE ---")
     
     if not PARQUET_FILE.exists():
-        print(f"❌ Normalized catalog not found at {PARQUET_FILE}. Run normalization script first.")
-        exit(1)
+        raise RuntimeError(f"❌ Normalized catalog not found at {PARQUET_FILE}. Run normalization script first.")
         
     if not AUDIO_DIR.exists():
-        print(f"❌ Audio directory not found at {AUDIO_DIR}. Make sure the staging volume is mounted.")
-        exit(1)
+        raise RuntimeError(f"❌ Audio directory not found at {AUDIO_DIR}. Make sure the staging volume is mounted.")
         
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     
