@@ -33,6 +33,9 @@ def extract_raw_marc(record):
     field_000 = record.get('000')
     data['new_000_ctrl'] = field_000.value() if field_000 else ''
     
+    field_001 = record.get('001')
+    data['new_001_ctrl'] = field_001.value() if field_001 else ''
+    
     field_005 = record.get('005')
     data['new_005_ctrl'] = field_005.value() if field_005 else ''
     

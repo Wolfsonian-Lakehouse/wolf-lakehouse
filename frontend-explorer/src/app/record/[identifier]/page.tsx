@@ -233,7 +233,7 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
                           </span>
                           <span className="text-sm md:text-base text-slate-300 font-light leading-relaxed break-words whitespace-pre-wrap">
                             {key === 'field_identifier' ? (
-                              selectedRecord.source_system === 'Alma' && selectedRecord.alma_identifier ? (
+                              selectedRecord.source_system === 'Alma' && selectedRecord.alma_identifier && /^\d+$/.test(String(selectedRecord.alma_identifier).split(';')[0].trim()) ? (
                                 <span className="flex flex-col gap-1.5">
                                   <a 
                                     href={`https://fiu-flvc.primo.exlibrisgroup.com/discovery/fulldisplay?docid=alma${selectedRecord.alma_identifier.split(';')[0].trim()}&context=L&vid=01FALSC_FIU:WOLF&search_scope=WOLFSONIAN&adaptor=Local%20Search%20Engine&tab=WOLFSONIAN&query=any,contains,${String(val).split(';')[0].trim()}&offset=0`}
