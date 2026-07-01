@@ -347,6 +347,9 @@ def extract_physical_items():
             
     if dfs:
         combined = pd.concat(dfs, ignore_index=True)
+        # Clean column names by stripping leading/trailing whitespace
+        combined.columns = combined.columns.str.strip()
+        
         if 'MMS Record ID' in combined.columns:
             combined['MMS Record ID'] = combined['MMS Record ID'].str.replace("'", "")
         combined.to_parquet(output_phys_parquet, index=False, engine='pyarrow')

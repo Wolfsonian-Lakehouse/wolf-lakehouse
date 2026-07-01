@@ -52,7 +52,7 @@ In addition to the data pipeline, the project features a powerful **Frontend Exp
 
 | Source | System | Records | Method |
 |---|---|---|---|
-| **Alma** | Ex Libris Library Management | 55,015 | Binary MARC (`.mrc`) file parsing via PyMARC |
+| **Alma** | Ex Libris Library Management | 55,015 | Binary MARC (`.mrc`) parsing via PyMARC & Physical Item (`.csv`) mapping |
 | **Proficio** | Museum Collection Database | 60,938 | Kerberos-authenticated SQL Server via ODBC |
 | **Islandora** | Public Digital Archive | 266,701 | Paginated REST API with concurrent fetching |
 | **Unified Gold Catalog** | Merged output | 116,000 | Alma + Proficio aligned and concatenated |
@@ -65,7 +65,7 @@ In addition to the data pipeline, the project features a powerful **Frontend Exp
 ## ⚡ Key Features
 
 * **Incremental Delta Merges (Upserts):** To avoid expensive full table scans, the Proficio extractor utilizes a high-watermark tracker to selectively pull only records created or modified since the last run. The Silver layer then seamlessly merges (upserts) these deltas into a persistent master Parquet table, deduplicating on `field_identifier` (the Proficio catalog number) without duplicating data.
-* **Metabase Serving Layer (DuckDB):** The pipeline concludes by automatically generating a persistent DuckDB database with instantaneous, zero-copy Views pointing directly to the Parquet files. Metabase easily connects to this DuckDB file for lightning-fast BI visualization. If DuckDB is locked by an active Metabase session, the pipeline gracefully skips view recreation — Metabase automatically picks up the freshly updated Parquet files on the next query.
+* **Metabase Serving Layer & Analytics (DuckDB):** The pipeline automatically generates a persistent DuckDB database powering an extensive suite of 18 separate SQL charts across 3 distinct dashboards (Lakehouse Analytics, Historical Metrics, and Image Completeness). Metabase easily connects to this DuckDB file for lightning-fast, zero-copy BI visualization, automatically picking up freshly updated Parquet files on every query.
 * **QA Quarantine (Dead Letter Queue):** Records that fail critical data quality checks (missing identifiers, empty titles) are automatically isolated into a `proficio_qa_failures.parquet` file via a dedicated microservice instead of breaking the pipeline. This allows data stewards to easily identify and fix dirty source data.
 * **Concurrent API Fetching:** The Islandora microservice utilizes a `ThreadPoolExecutor` and auto-discovery logic to fetch paginated API data rapidly, utilizing exponential backoff for network resilience.
 * **Unified Gold Catalog:** The pipeline dynamically bridges the massive schema gap between library systems (Alma) and museum systems (Proficio), automatically aligning and concatenating both into a single unified queryable table with a strict predetermined column hierarchy.
@@ -182,7 +182,7 @@ graph TD
 
 **Architecture & Performance**
 * **Serverless Zero-Latency Engine:** Uses DuckDB WebAssembly to download and query the compressed Parquet data directly inside the user's browser, resulting in instantaneous search results.
-* **Unified Search:** Automatically searches across both museum objects and library materials simultaneously.
+* **Unified Search & Granular Filtering:** Automatically searches across museum objects and library materials simultaneously, while providing strict distinct filtering between Art/Object Collections, Library Special Collections, and Research/Reference Books.
 * **Cost-Free Scaling:** Because the browser does all the computational work, the application can scale to thousands of simultaneous users without increasing cloud hosting costs.
 
 **Discovery & Navigation**
