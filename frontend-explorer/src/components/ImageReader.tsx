@@ -98,7 +98,7 @@ export default function ImageReader({ images, selectedRecord }: ImageReaderProps
           minScale={1}
           maxScale={8}
         >
-          <TransformComponent wrapperClass="!w-full !h-full" contentClass="!w-full !h-full flex items-center justify-center">
+          <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }} contentStyle={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <img 
               key={imgSrc} 
               src={imgSrc}

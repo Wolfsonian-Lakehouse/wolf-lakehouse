@@ -189,7 +189,7 @@ export default function Home() {
          const urlParams = new URLSearchParams(window.location.search);
          const param = urlParams.get('collection');
          if (param) {
-            sharedIds = param.split(',').filter(id => id.trim() !== '');
+            sharedIds = param.split('|').filter(id => id.trim() !== '');
             if (sharedCollectionIds.length === 0) setSharedCollectionIds(sharedIds);
          }
       }
@@ -971,14 +971,12 @@ export default function Home() {
                   <button 
                     onClick={() => {
                       if (typeof window !== 'undefined') {
-                        const url = new URL(window.location.href);
-                        url.searchParams.set('collection', collection.map(c => c.field_identifier).join(','));
+                        const url = new URL(window.location.origin);
+                        url.searchParams.set('collection', collection.map(c => c.field_identifier).join('|'));
                         url.searchParams.delete('collection_cleared');
                         const textToCopy = url.toString();
                         
-                        if (navigator.clipboard && window.isSecureContext) {
-                          navigator.clipboard.writeText(textToCopy);
-                        } else {
+                        const fallbackCopy = () => {
                           const textArea = document.createElement("textarea");
                           textArea.value = textToCopy;
                           textArea.style.position = "fixed";
@@ -988,6 +986,12 @@ export default function Home() {
                           textArea.select();
                           try { document.execCommand('copy'); } catch (err) {}
                           document.body.removeChild(textArea);
+                        };
+
+                        if (navigator.clipboard && window.isSecureContext) {
+                          navigator.clipboard.writeText(textToCopy).catch(() => fallbackCopy());
+                        } else {
+                          fallbackCopy();
                         }
                         
                         setIsCopied(true);
