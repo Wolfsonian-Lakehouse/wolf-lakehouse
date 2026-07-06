@@ -56,11 +56,12 @@ def raw_data_dump(table_name, incremental_dir):
 
     watermark_path = '/app/data/watermark_proficio.json'
     last_watermark = None
+    watermark_data = {}
     if os.path.exists(watermark_path):
         try:
             with open(watermark_path, 'r') as f:
-                data = json.load(f)
-                last_watermark = data.get(table_name)
+                watermark_data = json.load(f)
+                last_watermark = watermark_data.get(table_name)
         except json.JSONDecodeError:
             pass
 
@@ -106,11 +107,12 @@ def raw_data_dump(table_name, incremental_dir):
             if pd.notnull(max_add): dates.append(max_add)
             
             if dates:
-                # Format exactly as SQL Server datetime
-                new_watermark = max(dates).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+                # Format keeping full microsecond precision to avoid truncation loops
+                new_watermark = max(dates).strftime('%Y-%m-%d %H:%M:%S.%f')
                 if not last_watermark or new_watermark > last_watermark:
+                    watermark_data[table_name] = new_watermark
                     with open(watermark_path, 'w') as f:
-                        json.dump({table_name: new_watermark}, f)
+                        json.dump(watermark_data, f)
                     logging.info(f"💧 Updated watermark to {new_watermark}")
 
         # Save to Delta File
