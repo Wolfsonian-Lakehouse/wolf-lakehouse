@@ -180,14 +180,14 @@ def lakehouse_flow():
     proficio_csv = export_proficio.submit(wait_for=[missing_objects])
     alma_csv = export_alma.submit(wait_for=[alma_silver])
     
-    # 6. Serving Layer Phase (DuckDB)
-    duckdb_fut = build_duckdb.submit(wait_for=[proficio_csv, alma_csv, normalized_catalog, history_metrics, comparison_alma, image_audit])
-    
     # 6.5. Process NFS Images (Net New Only)
     images_fut = process_images_task.submit(wait_for=[normalized_catalog])
     
     # 6.6. Process NFS Audio
     audio_fut = process_audio_task.submit(wait_for=[images_fut])
+
+    # 6. Serving Layer Phase (DuckDB)
+    duckdb_fut = build_duckdb.submit(wait_for=[proficio_csv, alma_csv, normalized_catalog, history_metrics, comparison_alma, comparison_proficio, image_audit, audio_fut])
     
     # 7. Metrics Dashboard Phase
     metrics_fut = report_metrics.submit(wait_for=[duckdb_fut, audio_fut])
