@@ -88,13 +88,13 @@ The entire Lakehouse architecture is fully orchestrated via Prefect. Here is the
 
 ```mermaid
 graph TD
-    subgraph 1. Extraction Phase
+    subgraph phase1 ["1. Extraction Phase"]
         PR[Extract Proficio Raw]
         IR[Extract Islandora Raw]
         AR[Extract Alma Raw]
     end
 
-    subgraph 2. Silver Phase
+    subgraph phase2 ["2. Silver Phase"]
         PS[Transform Proficio Silver]
         AS[Transform Alma Silver]
         
@@ -102,12 +102,12 @@ graph TD
         AR --> AS
     end
     
-    subgraph 3. Validation Phase
+    subgraph phase3 ["3. Validation Phase"]
         QA[Isolate QA Failures]
         PS --> QA
     end
 
-    subgraph 4. Gold Generation Phase
+    subgraph phase4 ["4. Gold Generation Phase"]
         UC[Generate Unified Catalog]
         NC[Normalize Gold Catalog]
         MO[Generate Missing Objects]
@@ -141,7 +141,7 @@ graph TD
         NC --> SM
     end
 
-    subgraph 5. Export Phase
+    subgraph phase5 ["5. Export Phase"]
         EP[Export Proficio to Workbench]
         EA[Export Alma to Workbench]
         
@@ -149,7 +149,7 @@ graph TD
         AS --> EA
     end
 
-    subgraph 6. Serving & Media Layer
+    subgraph phase6 ["6. Serving & Media Layer"]
         DB[Build DuckDB Metabase Views]
         PI[Process NFS Images]
         PA[Process NFS Audio]
@@ -165,7 +165,7 @@ graph TD
         PI --> PA
     end
 
-    subgraph 7. Monitoring
+    subgraph phase7 ["7. Monitoring"]
         RM[Report Pipeline Metrics]
         
         DB --> RM
