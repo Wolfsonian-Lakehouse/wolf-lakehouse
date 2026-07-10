@@ -289,7 +289,9 @@ def main():
     logging.info(f'Dropped {before - len(df.columns)} fully empty columns.')
 
     OUTPUT_PARQUET.parent.mkdir(parents=True, exist_ok=True)
-    df.to_parquet(OUTPUT_PARQUET, index=False)
+    tmp_parquet = OUTPUT_PARQUET.with_suffix('.tmp.parquet')
+    df.to_parquet(tmp_parquet, index=False)
+    tmp_parquet.replace(OUTPUT_PARQUET)
     logging.info(f'💾 Saved Normalized Catalog: {OUTPUT_PARQUET}')
     logging.info(f'Final Shape: {len(df)} records, {len(df.columns)} columns.')
     logging.info('✅ Gold Normalized Catalog complete!')

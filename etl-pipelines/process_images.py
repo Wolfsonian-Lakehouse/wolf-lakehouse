@@ -249,7 +249,9 @@ def main():
     df['has_image'] = df['image_count'] > 0
     
     # Save the updated dataframe back to parquet
-    df.to_parquet(PARQUET_FILE, index=False)
+    tmp_parquet = PARQUET_FILE.with_suffix('.tmp.parquet')
+    df.to_parquet(tmp_parquet, index=False)
+    tmp_parquet.replace(PARQUET_FILE)
     print("✅ Catalog updated with image_count and has_image flags.")
 
 

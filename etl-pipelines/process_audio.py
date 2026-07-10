@@ -181,7 +181,9 @@ def main():
     df['audio_count'] = df['field_identifier'].apply(check_audio_count)
     df['has_audio'] = df['audio_count'] > 0
     
-    df.to_parquet(PARQUET_FILE, index=False)
+    tmp_parquet = PARQUET_FILE.with_suffix('.tmp.parquet')
+    df.to_parquet(tmp_parquet, index=False)
+    tmp_parquet.replace(PARQUET_FILE)
     print("✅ Catalog updated with audio_count and has_audio flags.")
 
 
