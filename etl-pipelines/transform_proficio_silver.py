@@ -288,7 +288,11 @@ def main():
             # Deduplicate keeping the latest version.
             # Use field_identifier (renamed from cat_nbr) as the true Proficio primary key.
             # access_nbr is NULL for most records and causes massive data loss with drop_duplicates.
-            if 'field_identifier' in df_combined.columns:
+            if 'record_id' in df_combined.columns:
+                if 'field_identifier' in df_combined.columns:
+                    df_combined['field_identifier'] = df_combined['field_identifier'].apply(normalize_identifier)
+                df_master = df_combined.drop_duplicates(subset=['record_id'], keep='last')
+            elif 'field_identifier' in df_combined.columns:
                 df_combined['field_identifier'] = df_combined['field_identifier'].apply(normalize_identifier)
                 df_master = df_combined.drop_duplicates(subset=['field_identifier'], keep='last')
             elif 'access_nbr' in df_combined.columns:
@@ -301,7 +305,12 @@ def main():
         logging.info("No Silver Master exists. Creating new from Deltas.")
         df_master = df_deltas
         # Still deduplicate even on first build — multiple delta files (raw dump + fresh pull) can overlap
-        if 'field_identifier' in df_master.columns:
+        if 'record_id' in df_master.columns:
+            if 'field_identifier' in df_master.columns:
+                df_master['field_identifier'] = df_master['field_identifier'].apply(normalize_identifier)
+            df_master = df_master.drop_duplicates(subset=['record_id'], keep='last')
+            logging.info(f"Deduplication on fresh build: {len(df_master)} unique records.")
+        elif 'field_identifier' in df_master.columns:
             df_master['field_identifier'] = df_master['field_identifier'].apply(normalize_identifier)
             df_master = df_master.drop_duplicates(subset=['field_identifier'], keep='last')
             logging.info(f"Deduplication on fresh build: {len(df_master)} unique records.")
