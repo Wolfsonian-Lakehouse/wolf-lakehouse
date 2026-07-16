@@ -141,6 +141,10 @@ def main():
     final_col_count = len(df_unified.columns)
     logging.info(f"Dropped {initial_col_count - final_col_count} completely empty columns.")
     
+    # Convert nanosecond timestamps to standard datetime [us] to prevent DuckDB cast errors in Metabase
+    for col in df_unified.select_dtypes(include=['datetime64[ns]', 'datetime64[ns, UTC]']).columns:
+        df_unified[col] = df_unified[col].astype('datetime64[us]')
+
     # Save the Unified Catalog
     df_unified.to_parquet(OUTPUT_PARQUET, index=False)
     logging.info(f"💾 Saved Unified Catalog Parquet: {OUTPUT_PARQUET}")

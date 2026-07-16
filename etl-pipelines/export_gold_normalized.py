@@ -290,6 +290,11 @@ def main():
 
     OUTPUT_PARQUET.parent.mkdir(parents=True, exist_ok=True)
     tmp_parquet = OUTPUT_PARQUET.with_suffix('.tmp.parquet')
+
+    # Convert nanosecond timestamps to standard datetime [us] to prevent DuckDB cast errors in Metabase
+    for col in df.select_dtypes(include=['datetime64[ns]', 'datetime64[ns, UTC]']).columns:
+        df[col] = df[col].astype('datetime64[us]')
+
     df.to_parquet(tmp_parquet, index=False)
     tmp_parquet.replace(OUTPUT_PARQUET)
     logging.info(f'💾 Saved Normalized Catalog: {OUTPUT_PARQUET}')
