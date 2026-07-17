@@ -557,10 +557,10 @@ export default function Home() {
                   Featured Digital Exhibition
                 </div>
                 <h2 className="text-2xl md:text-3xl font-display font-black text-white uppercase tracking-tight group-hover:text-mca-cyan transition-colors">
-                  The Kreisman Collection
+                  The Kreisman & Dodge Collection
                 </h2>
                 <p className="text-sm font-sans text-gray-400 font-light max-w-xl">
-                  Explore 789 meticulously preserved archival artifacts and museum objects.
+                  Explore meticulously preserved archival artifacts and museum objects.
                 </p>
               </div>
               <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full border border-mca-cyan/50 text-mca-cyan group-hover:bg-mca-cyan group-hover:text-mca-black transition-all">

@@ -195,9 +195,24 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
                   <h2 className="text-3xl md:text-5xl font-black font-display uppercase tracking-tight leading-tight break-words">
                     {selectedRecord.title || selectedRecord.field_identifier || '[UNTITLED OBJECT]'}
                   </h2>
+                  
+                  {selectedRecord.field_credit_line && (
+                    selectedRecord.field_credit_line.toLowerCase().includes('kreisman') || 
+                    selectedRecord.field_credit_line.toLowerCase().includes('dodge')
+                  ) && (
+                    <Link 
+                      href="/kreisman" 
+                      className="inline-flex items-center gap-2 mt-6 px-4 py-2 bg-mca-cyan/10 border border-mca-cyan/30 text-mca-cyan hover:bg-mca-cyan hover:text-mca-black transition-all group"
+                    >
+                      <span className="text-xs font-mono font-bold tracking-widest uppercase">
+                        Part of The Kreisman & Dodge Collection
+                      </span>
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </Link>
+                  )}
                 </header>
 
-                <div className="space-y-8">
+                <div className="space-y-8 mt-8">
                   {Object.entries(selectedRecord)
                     .filter(([key, val]) => val !== null && val !== "" && !["has_image", "title", "year_created", "source_system", "id", "image_count", "has_audio", "audio_count", "search_text", "alma_identifier"].includes(key))
                     .sort(([keyA], [keyB]) => {

@@ -27,11 +27,11 @@ export default function KreismanCollection() {
       const dataQuery = `
         SELECT title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, location, storage_location, source_system, has_image, image_count, field_linked_agent, field_subject, field_place_published, field_edtf_date_created 
         FROM catalog 
-        WHERE LOWER(field_credit_line) LIKE '%kreisman%'
+        WHERE LOWER(field_credit_line) LIKE '%kreisman%' AND LOWER(field_credit_line) LIKE '%dodge%'
         ORDER BY has_image DESC, title ASC 
       `;
       
-      const countQuery = `SELECT count(*) as total FROM catalog WHERE LOWER(field_credit_line) LIKE '%kreisman%'`;
+      const countQuery = `SELECT count(*) as total FROM catalog WHERE LOWER(field_credit_line) LIKE '%kreisman%' AND LOWER(field_credit_line) LIKE '%dodge%'`;
 
       const [data, countData] = await Promise.all([
         runQuery(dataQuery),
@@ -85,7 +85,7 @@ export default function KreismanCollection() {
             </div>
             
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-display uppercase tracking-tighter leading-none bg-clip-text text-transparent bg-gradient-to-br from-white to-gray-500 pb-2">
-              The Kreisman Collection
+              The Kreisman & Dodge Collection
             </h1>
 
             <p className="text-gray-400 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto">
