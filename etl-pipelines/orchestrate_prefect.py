@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 import extract_proficio_raw
 import extract_islandora_raw
 import extract_alma_raw
+import extract_google_analytics
 import transform_proficio_silver
 import transform_alma_silver
 import isolate_proficio_qa_failures
@@ -41,6 +42,10 @@ def extract_islandora():
 @task(name="Extract Alma Raw")
 def extract_alma():
     extract_alma_raw.main()
+
+@task(name="Extract Google Analytics")
+def extract_ga4():
+    extract_google_analytics.main()
 
 # ==========================================
 # 2. SILVER LAYER (Cleansing & Merging)
@@ -158,6 +163,7 @@ def lakehouse_flow():
     proficio_raw = extract_proficio.submit()
     islandora_raw = extract_islandora.submit()
     alma_raw = extract_alma.submit()
+    ga4_raw = extract_ga4.submit()
 
     # 2. Transformation Phase (Silver)
     proficio_silver = transform_proficio.submit(wait_for=[proficio_raw])
@@ -187,7 +193,7 @@ def lakehouse_flow():
     audio_fut = process_audio_task.submit(wait_for=[images_fut])
 
     # 6. Serving Layer Phase (DuckDB)
-    duckdb_fut = build_duckdb.submit(wait_for=[proficio_csv, alma_csv, normalized_catalog, history_metrics, comparison_alma, comparison_proficio, image_audit, audio_fut])
+    duckdb_fut = build_duckdb.submit(wait_for=[proficio_csv, alma_csv, normalized_catalog, history_metrics, comparison_alma, comparison_proficio, image_audit, audio_fut, ga4_raw])
     
     # 7. Metrics Dashboard Phase
     metrics_fut = report_metrics.submit(wait_for=[duckdb_fut, audio_fut])

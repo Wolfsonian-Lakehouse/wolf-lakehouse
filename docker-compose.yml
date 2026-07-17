@@ -21,6 +21,7 @@ services:
     working_dir: /app
     environment:
       - PREFECT_API_URL=http://prefect-server:4200/api
+      - GA4_PROPERTY_ID=${GA4_PROPERTY_ID:-}
     depends_on:
       - prefect-server
     command: bash -c "sleep 5 && python etl-pipelines/orchestrate_prefect.py"

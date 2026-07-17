@@ -32,7 +32,8 @@ def create_views():
         'gold_unified_catalog': '/app/data/gold/unified_catalog.parquet',
         'gold_normalized_catalog': '/app/data/gold/unified_catalog_normalized.parquet',
         'comparison_alma': '/app/data/gold/comparison_alma.parquet',
-        'image_audit_report': '/app/data/gold/image_audit_report.csv'
+        'image_audit_report': '/app/data/gold/image_audit_report.csv',
+        'ga4_metrics': '/app/data/gold/ga4_metrics.parquet'
     }
     snapshot_files = glob.glob('/app/data/gold/snapshots/history_*.parquet')
     for parquet_path in snapshot_files:

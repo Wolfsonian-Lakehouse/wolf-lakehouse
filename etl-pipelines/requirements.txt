@@ -11,6 +11,7 @@ requests==2.34.2
 urllib3==2.7.0
 beautifulsoup4==4.15.0
 lxml==6.1.1
+google-analytics-data==0.20.0
 
 # --- Databases & Connectivity ---
 SQLAlchemy==2.0.51
