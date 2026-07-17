@@ -557,7 +557,7 @@ export default function Home() {
                   Featured Digital Exhibition
                 </div>
                 <h2 className="text-2xl md:text-3xl font-display font-black text-white uppercase tracking-tight group-hover:text-mca-cyan transition-colors">
-                  The Kreisman & Dodge Collection
+                  The Dodge and Kreisman Collection
                 </h2>
                 <p className="text-sm font-sans text-gray-400 font-light max-w-xl">
                   Explore meticulously preserved archival artifacts and museum objects.

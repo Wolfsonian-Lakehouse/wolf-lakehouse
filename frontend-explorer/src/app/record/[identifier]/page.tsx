@@ -205,7 +205,7 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
                       className="inline-flex items-center gap-2 mt-6 px-4 py-2 bg-mca-cyan/10 border border-mca-cyan/30 text-mca-cyan hover:bg-mca-cyan hover:text-mca-black transition-all group"
                     >
                       <span className="text-xs font-mono font-bold tracking-widest uppercase">
-                        Part of The Kreisman & Dodge Collection
+                        Part of The Dodge and Kreisman Collection
                       </span>
                       <span className="group-hover:translate-x-1 transition-transform">→</span>
                     </Link>

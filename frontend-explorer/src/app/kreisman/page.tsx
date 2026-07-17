@@ -85,7 +85,7 @@ export default function KreismanCollection() {
             </div>
             
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-display uppercase tracking-tighter leading-none bg-clip-text text-transparent bg-gradient-to-br from-white to-gray-500 pb-2">
-              The Kreisman & Dodge Collection
+              The Dodge and Kreisman Collection
             </h1>
 
             <p className="text-gray-400 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto">
