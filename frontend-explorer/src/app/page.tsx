@@ -564,7 +564,7 @@ export default function Home() {
                   The Dodge and Kreisman Collection
                 </h2>
                 <p className="text-sm font-sans text-gray-400 font-light max-w-xl">
-                  Explore meticulously preserved archival artifacts and museum objects.
+                  Explore thousands of industrial design drawings, architectural blueprints, and vintage advertisements from our recently digitized collection.
                 </p>
               </div>
               <div className="flex-shrink-0 hidden md:block">
@@ -576,8 +576,29 @@ export default function Home() {
                   loading="lazy"
                 />
               </div>
-              <div className="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full border border-mca-cyan/50 text-mca-cyan group-hover:bg-mca-cyan group-hover:text-mca-black transition-all">
-                →
+            </div>
+          </Link>
+
+          <Link href="/art-swipe" className="block mt-4 group cursor-pointer border border-mca-cyan/30 hover:border-mca-cyan transition-colors bg-mca-cyan/5 p-6 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2 flex-1">
+                <div className="text-[10px] font-mono font-bold text-mca-cyan uppercase tracking-widest">
+                  Featured Digital Experience
+                </div>
+                <h2 className="text-2xl md:text-3xl font-display font-black text-white uppercase tracking-tight group-hover:text-mca-cyan transition-colors">
+                  Art Swipe
+                </h2>
+                <p className="text-sm font-sans text-gray-400 font-light max-w-xl">
+                  Discover random gems from the collection. Swipe right on your favorites to save them instantly to your curated list!
+                </p>
+              </div>
+              <div className="flex-shrink-0 hidden md:block">
+                <img 
+                  src="/art-swipe-thumbnail.png" 
+                  alt="Art Swipe Thumbnail" 
+                  className="w-24 h-24 md:w-32 md:h-32 object-cover border border-mca-cyan/30 bg-black/50 transform group-hover:scale-105 transition-all duration-500 rounded-2xl"
+                  loading="lazy"
+                />
               </div>
             </div>
           </Link>
