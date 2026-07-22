@@ -34,6 +34,13 @@ The Wolfsonian Lakehouse is an automated, incremental ELT (Extract, Load, Transf
 
 In addition to the data pipeline, the project features a powerful **Frontend Explorer**—a serverless, zero-latency web application built with Next.js and DuckDB WebAssembly. This custom interface directly queries the compressed Parquet data right inside the user's browser, allowing staff, researchers, and the public to visually search, filter, and curate collections across all 116,000+ unified library and museum records without the need for expensive database hosting or backend architecture.
 
+## 🎮 Featured Digital Experiences
+Built on top of the Lakehouse's high-performance DuckDB WASM engine, the Frontend Explorer features interactive mini-games and curation tools designed to engage users with the archive in novel ways:
+
+- 🕵️‍♂️ **Curator's Challenge (Spot the Real Title):** A fast-paced, 10-round multiple-choice game where users must identify the real artifact title from a list of dynamically generated, highly-plausible fake titles pulled from the database.
+- 🎨 **Art Swipe Discovery Mode:** A highly engaging, Tinder-style serendipity engine that utilizes DuckDB's `USING SAMPLE` function to serve a blazing-fast, randomized deck of visual artifacts. Users can casually swipe right and securely batch-save the entire curated deck to their personal collection simultaneously.
+- 🧠 **Memory Match (Kreisman Collection):** A classic concentration card game that dynamically generates matching pairs using high-resolution architectural artifacts from the Kreisman collection, testing users' spatial memory.
+
 ## 🏗️ Architecture & Tech Stack
 * **Orchestration:** Prefect 3 (Native 21-Node DAG), Docker Compose, and Make
 * **Data Extraction:** Python 3.10 (Pandas, PyArrow, requests, pymarc) with strictly pinned dependencies for deterministic builds.
@@ -91,14 +98,14 @@ The entire Lakehouse architecture is fully orchestrated via Prefect. Here is the
 
 ```mermaid
 graph TD
-    subgraph phase1 ["1. Extraction Phase"]
+    subgraph phase1 [1. Extraction Phase]
         PR[Extract Proficio Raw]
         IR[Extract Islandora Raw]
         AR[Extract Alma Raw]
         GA[Extract Google Analytics]
     end
 
-    subgraph phase2 ["2. Silver Phase"]
+    subgraph phase2 [2. Silver Phase]
         PS[Transform Proficio Silver]
         AS[Transform Alma Silver]
         
@@ -106,12 +113,12 @@ graph TD
         AR --> AS
     end
     
-    subgraph phase3 ["3. Validation Phase"]
+    subgraph phase3 [3. Validation Phase]
         QA[Isolate QA Failures]
         PS --> QA
     end
 
-    subgraph phase4 ["4. Gold Generation Phase"]
+    subgraph phase4 [4. Gold Generation Phase]
         UC[Generate Unified Catalog]
         NC[Normalize Gold Catalog]
         MO[Generate Missing Objects]
@@ -145,7 +152,7 @@ graph TD
         NC --> SM
     end
 
-    subgraph phase5 ["5. Export Phase"]
+    subgraph phase5 [5. Export Phase]
         EP[Export Proficio to Workbench]
         EA[Export Alma to Workbench]
         
@@ -153,7 +160,7 @@ graph TD
         AS --> EA
     end
 
-    subgraph phase6 ["6. Serving & Media Layer"]
+    subgraph phase6 [6. Serving & Media Layer]
         DB[Build DuckDB Metabase Views]
         PI[Process NFS Images]
         PA[Process NFS Audio]
@@ -170,7 +177,7 @@ graph TD
         PI --> PA
     end
 
-    subgraph phase7 ["7. Monitoring"]
+    subgraph phase7 [7. Monitoring]
         RM[Report Pipeline Metrics]
         
         DB --> RM

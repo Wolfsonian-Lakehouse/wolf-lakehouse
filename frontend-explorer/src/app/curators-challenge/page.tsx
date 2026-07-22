@@ -32,12 +32,13 @@ export default function CuratorsChallengePage() {
         
         // Fetch 40 random artifacts with images and non-null titles
         const query = `
-            SELECT title, field_identifier, field_genre, field_linked_agent, field_edtf_date_created
-            FROM catalog 
-            WHERE has_image = true 
-              AND title IS NOT NULL 
-              AND title != ''
-            USING SAMPLE 40 ROWS
+            SELECT * FROM (
+                SELECT title, field_identifier, field_genre, field_linked_agent, field_edtf_date_created
+                FROM catalog 
+                WHERE has_image = true 
+                  AND title IS NOT NULL 
+                  AND title != ''
+            ) USING SAMPLE 40 ROWS
         `;
         
         const data = await runQuery(query);
