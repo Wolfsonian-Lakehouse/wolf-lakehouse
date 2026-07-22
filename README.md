@@ -89,6 +89,7 @@ Built on top of the Lakehouse's high-performance DuckDB WASM engine, the Fronten
 * **Automated Website Traffic Analytics:** Connects securely to the Google Analytics 4 Data API to incrementally fetch frontend explorer traffic (users, sessions, page views) and stores it natively inside the Lakehouse for unified BI dashboarding in Metabase.
 * **Bulk CSV Filtering:** The frontend explorer natively supports bulk CSV uploads. Staff can upload an arbitrary list of accession numbers or field identifiers, which the browser instantly parses and translates into a dynamic DuckDB `IN` clause, enabling hyper-specific batch filtering.
 * **Batch Collection Curation:** Users can execute complex search queries (or bulk CSV filters) and instantly save up to 1,000 matching results to their personal "Saved Collection" with a single click, completely eliminating manual curation bottlenecks.
+* **Global SEO & Social Indexing:** Configured with robust Next.js OpenGraph tags, Twitter Cards, and dynamic XML sitemaps to ensure maximum indexing by Googlebot, while providing visually rich preview cards when specific artifacts or games are shared across social media and messaging apps.
 
 ---
 
