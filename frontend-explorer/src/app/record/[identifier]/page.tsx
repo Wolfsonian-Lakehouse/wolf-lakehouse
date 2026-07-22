@@ -240,10 +240,10 @@ export default function RecordPage({ params }: { params: Promise<{ identifier: s
                     {selectedRecord.title || selectedRecord.field_identifier || '[UNTITLED OBJECT]'}
                   </h2>
                   
-                  {selectedRecord.field_credit_line && (
+                  {((selectedRecord.field_credit_line && (
                     selectedRecord.field_credit_line.toLowerCase().includes('kreisman') || 
                     selectedRecord.field_credit_line.toLowerCase().includes('dodge')
-                  ) && (
+                  )) || (selectedRecord.source_system === 'Proficio' && selectedRecord.field_identifier?.startsWith('2022.7'))) && (
                     <Link 
                       href="/kreisman" 
                       className="inline-flex items-center gap-2 mt-6 px-4 py-2 bg-mca-cyan/10 border border-mca-cyan/30 text-mca-cyan hover:bg-mca-cyan hover:text-mca-black transition-all group"

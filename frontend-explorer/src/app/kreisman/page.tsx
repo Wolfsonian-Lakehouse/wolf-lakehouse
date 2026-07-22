@@ -27,11 +27,12 @@ export default function KreismanCollection() {
       const dataQuery = `
         SELECT title, field_identifier, field_collection_type, field_collection_note, field_credit_line, field_extent, field_physical_form, field_genre, field_description_long, location, storage_location, source_system, has_image, image_count, field_linked_agent, field_subject, field_place_published, field_edtf_date_created 
         FROM catalog 
-        WHERE LOWER(field_credit_line) LIKE '%kreisman%' AND LOWER(field_credit_line) LIKE '%dodge%'
+        WHERE (LOWER(field_credit_line) LIKE '%kreisman%' AND LOWER(field_credit_line) LIKE '%dodge%')
+           OR (source_system = 'Proficio' AND field_identifier LIKE '2022.7%')
         ORDER BY has_image DESC, title ASC 
       `;
       
-      const countQuery = `SELECT count(*) as total FROM catalog WHERE LOWER(field_credit_line) LIKE '%kreisman%' AND LOWER(field_credit_line) LIKE '%dodge%'`;
+      const countQuery = `SELECT count(*) as total FROM catalog WHERE (LOWER(field_credit_line) LIKE '%kreisman%' AND LOWER(field_credit_line) LIKE '%dodge%') OR (source_system = 'Proficio' AND field_identifier LIKE '2022.7%')`;
 
       const [data, countData] = await Promise.all([
         runQuery(dataQuery),

@@ -54,7 +54,8 @@ export default function MemoryMatch() {
       const query = `
         SELECT title, field_identifier, field_linked_agent, field_edtf_date_created, field_genre 
         FROM catalog 
-        WHERE (LOWER(field_credit_line) LIKE '%kreisman%' OR LOWER(field_credit_line) LIKE '%dodge%') 
+        WHERE ((LOWER(field_credit_line) LIKE '%kreisman%' OR LOWER(field_credit_line) LIKE '%dodge%') 
+           OR (source_system = 'Proficio' AND field_identifier LIKE '2022.7%'))
         AND has_image = true 
         ORDER BY random() 
         LIMIT 8
