@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wolfsonian Lakehouse | Lookup Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-elements">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <main class="container">
+        <header class="glass-panel header">
+            <div>
+                <h1>LAKEHOUSE LOOKUP</h1>
+                <p class="subtitle">Search and query the 116k+ artifacts instantly.</p>
+            </div>
+            <div class="api-status">
+                <div class="status-indicator"></div>
+                <span>API Online</span>
+            </div>
+        </header>
+
+        <section class="search-section glass-panel">
+            <form id="searchForm" class="search-form">
+                <div class="search-wrapper">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Search by title, subject, or accession number (e.g., chairs, XC1990...)" autocomplete="off">
+                </div>
+                <button type="submit" class="btn primary-btn" id="searchBtn">
+                    <span>Search</span>
+                </button>
+            </form>
+            <div class="quick-filters">
+                <button class="btn ghost-btn active" data-filter="recent">All Records</button>
+                <a href="https://lakehouse.wolfsonian.org/docs" target="_blank" class="btn ghost-btn external-link">
+                    API Documentation
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                </a>
+            </div>
+        </section>
+
+        <section class="results-section glass-panel">
+            <div class="table-container">
+                <div id="loadingIndicator" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Querying Lakehouse...</p>
+                </div>
+                
+                <table id="resultsTable" class="hidden">
+                    <thead>
+                        <tr>
+                            <th>Accession Number</th>
+                            <th>Title</th>
+                            <th>Creator</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Rows injected via JS -->
+                    </tbody>
+                </table>
+                
+                <div id="noResults" class="no-results hidden">
+                    <p>No artifacts matched your query.</p>
+                </div>
+            </div>
+            
+            <div class="pagination hidden" id="paginationControls">
+                <button id="prevBtn" class="btn outline-btn" disabled>Previous</button>
+                <span id="pageInfo" class="page-info">Page 1</span>
+                <button id="nextBtn" class="btn outline-btn">Next</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for viewing full record -->
+    <div id="recordModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content glass-panel">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <h2 id="modalTitle">Record Detail</h2>
+            <div class="record-grid" id="modalGrid">
+                <!-- Data injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

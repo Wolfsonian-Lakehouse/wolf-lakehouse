@@ -4,10 +4,21 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="Wolfsonian Lakehouse API",
     description="Public REST API for programmatic access to the Wolfsonian-FIU collections data.",
     version="1.0.0"
+)
+
+# Allow cross-origin requests (CORS) from any origin (or specify labs.wolfsonian.org)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins for this public API
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 PARQUET_PATH = "/app/data/gold/unified_catalog_normalized.parquet"
